@@ -1,0 +1,70 @@
+<link rel="stylesheet" href="style.css">
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="content.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {		
+	fbt.init();
+});
+</script>
+
+<h1>Facebook Test User</h1>
+<div id="contents"></div>
+
+<div id="message" class="userForm"></div>
+
+<div id="home" class="userForm">
+	<div>
+		<p>Manage test users associated with an app:</p>
+		<select id="selectApp" data-view"usersView"></select>
+	</div>
+	<div>
+		<p>Add an app to manage test users:</p>
+		<button class="btnAction" data-view="appAdd" id="btnAppAdd">Add App</button>	
+	</div>
+</div>
+
+<div id="appAdd" class="userForm">	
+	<form id="appAddForm">
+		<h5>Add App</h5>		
+		<fieldset>
+			<label for="appAddFormName">Name:</label>
+			<input type="text" name="appAddFormName" id="appAddFormName" />			
+			<label for="appAddFormID">App ID:</label>
+			<input type="text" name="appAddFormID" id="appAddFormID" />
+			<label for="appAddFormSecret">App Secret:</label>
+			<input type="text" name="appAddFormSecret" id="appAddFormSecret" />	
+			<label for="appAddFormToken">App Access Token:</label>
+			<input type="text" name="appAddFormToken" id="appAddFormToken" />				
+			<a href="#" id="appAddFormGenerateToken">Generate Token</a>
+		</fieldset>
+		<fieldset class="submits">
+			<button class="btnCancel" data-view="home" id="appAddFormCancel">Cancel</button>
+			<button class="btnSubmit" id="appAddFormSubmit">Save</button>
+		</fieldset>
+	</form>
+</div>
+
+<div id="usersView" class="userForm">	
+	<form id="usersViewForm">
+		<h5>Test Users</h5>
+
+		<table class="textUserTable">
+			<thead>
+				<th>ID</th>
+				<th>Email</th>
+				<th>Password</th>
+			</thead>
+		</table>
+
+		<fieldset class="submits">
+			<button class="btnCancel" data-view="home" id="usersViewFormCancel">Cancel</button>
+		</fieldset>
+
+	</form>
+</div>
+
+<div id="log">
+	<a href="#">Show Log</a>
+	<textarea id="debug"></textarea>
+</div>

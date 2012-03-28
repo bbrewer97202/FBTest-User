@@ -1,0 +1,20 @@
+body { font-size: 11px; color: #000; font-family: sans-serif; min-width: 600px; min-height: 300px; }
+textarea { width: 80%; height: 200px; }
+a { color: #69c; }
+
+form { background-color: #eee; margin: 0; padding: 0; }
+input[type=text] { width: 310px; margin-bottom: 1em; }
+fieldset { border: none; }
+fieldset.submits { background-color: #ccc; text-align: right; }
+label { display: block; }
+.userForm { padding: 10px; display: none; }
+.userForm h5 { margin: 0; padding: 10px; font-weight: bold; font-size: 150%; display: block; background-color: #ccc; }
+
+#log { position: fixed; top: 0; left: 0; width: 100%; z-index: 100; }
+#log a { position: absolute; top: 2px; right: 5px; }
+#log textarea { position: absolute; top: 30px; left: 0; display: none; width: 100%; min-height: 80%; padding: 10px; }
+#message { color: #c06; padding: 10px 0; }
+
+#home { overflow: auto; }
+#home div { float: left; background-color: #eee; border: solid 1px #ccc; margin: 0 20px 20px 0; padding: 20px; }
+#home div p { font-size: 13px; display: block; }
