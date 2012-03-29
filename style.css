@@ -1,4 +1,4 @@
-body { font-size: 11px; color: #000; font-family: sans-serif; min-width: 600px; min-height: 300px; }
+body { font-size: 11px; color: #000; font-family: sans-serif; }
 textarea { width: 80%; height: 200px; }
 a { color: #69c; }
 
@@ -18,3 +18,10 @@ label { display: block; }
 #home { overflow: auto; }
 #home div { float: left; background-color: #eee; border: solid 1px #ccc; margin: 0 20px 20px 0; padding: 20px; }
 #home div p { font-size: 13px; display: block; }
+
+.userListing { table-layout: fixed; border-collapse: collapse; margin-bottom: 20px; width: 100%; text-align: left; }
+.userListing th { font-weight: bold; padding: .5em; }
+.userListing td { width: auto; background-color: #eee; padding: .5em; word-wrap: break-word; border-bottom: solid 1px #fff; }
+.userListing td.key { font-weight: bold; width: 140px !important; }
+.userListingHead { margin-top: 10px; border: solid 1px #eee; padding: .5em; }
+.userListingHead span { font-size: 18px; font-weight: bold; padding-right: 20px; }
