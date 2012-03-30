@@ -202,7 +202,6 @@ var fbt = {
 			fbt.facebook.getTestUsersByAppId(appData.appid, appData.token, function(data) {
 				if (data) {
 					console.log(data);
-					//id, access_token, login_url
 					$.each(data.data, function(index, value) {
 						fbt.facebook.getUserById(value.id, value.access_token, function(user) {
 
