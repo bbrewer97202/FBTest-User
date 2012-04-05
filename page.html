@@ -45,38 +45,90 @@ $(document).ready(function() {
 	</form>
 </div>
 
+<div id="userCreate" class="userForm">		
+	<h3>Create Test User</h3>
+	<form id="userCreateForm">
+		<fieldset>
+			<label for="userCreateName">Name:</label>
+			<input type="text" name="userCreateName" id="userCreateName" /> 
+			<small>Leave blank to accept auto generated name</small>
+		</fieldset>
+		<fieldset>
+			<label for="userCreateLocale">Locale:</label>
+			<input type="text" name="userCreateLocale" id="userCreateLocale" value="en_US" />
+		</fieldset>		
+		<fieldset>
+			<label for="userCreatePermissions">Permissions:</label>
+			<input type="text" name="userCreatePermissions" id="userCreatePermissions" /> 
+			<small>Comma separated list</small>
+		</fieldset>				
+		<input type="hidden" name="userCreateFormAppId" id="userCreateFormAppId" value="" />
+		<input type="hidden" name="userCreateFormToken" id="userCreateFormToken" value="" />
+		<fieldset class="submits">
+			<button class="btnCancel" data-view="usersList" id="userCreateFormCancel">Cancel</button>
+			<button class="btnSubmit" id="userCreateFormSubmit">Save</button>
+		</fieldset>
+	</form>
+</div>
+
+<div id="userEditName" class="userForm">		
+	<h3>Edit User Name</h3>
+	<form id="userEditNameForm">
+		<fieldset>
+			<label for="userEditNameFormName">Name:</label>
+			<input type="text" name="userEditNameFormName" id="userEditNameFormName" /> 
+		</fieldset>
+		<input type="hidden" name="userEditNameFormUserId" id="userEditNameFormUserId" value="" />
+		<input type="hidden" name="userEditNameFormAppId" id="userEditNameFormAppId" value="" />
+		<input type="hidden" name="userEditNameFormToken" id="userEditNameFormToken" value="" />		
+		<fieldset class="submits">
+			<button class="btnCancel" data-view="usersList" id="userEditNameFormCancel">Cancel</button>
+			<button class="btnSubmit" id="userEditNameFormSubmit">Save</button>
+		</fieldset>
+	</form>
+</div>
+
+
+<div id="userEditPassword" class="userForm">		
+	<h3>Edit User Password</h3>
+	<form id="userEditPasswordForm">
+		<fieldset>
+			<label for="userEditPasswordFormPassword">Password:</label>
+			<input type="text" name="userEditPasswordFormPassword" id="userEditPasswordFormPassword" /> 
+			<p>Existing password cannot be returned from Facebook, only updated with a new value.</p>
+		</fieldset>
+		<input type="hidden" name="userEditPasswordFormUserId" id="userEditPasswordFormUserId" value="" />
+		<input type="hidden" name="userEditPasswordFormAppId" id="userEditPasswordFormAppId" value="" />
+		<input type="hidden" name="userEditPasswordFormToken" id="userEditPasswordFormToken" value="" />				
+		<fieldset class="submits">
+			<button class="btnCancel" data-view="usersList" id="userEditPasswordFormCancel">Cancel</button>
+			<button class="btnSubmit" id="userEditPasswordFormSubmit">Save</button>
+		</fieldset>
+	</form>
+</div>
+
 <div id="usersList" class="userForm">	
 	
-	<h5>Test Users</h5>
-	<div id="usersListListing"></div>
+	<h3>Test Users</h3>
+	<div class="actionableContent">
+		<button class="btnCreateTestUser" id="userListCreateUser">Create Test User</button>
+	</div>
+
+
+	<h5>Existing Test Users</h5>
+	<div id="usersListListing">
+		<ul class="userListing"></ul>
+	</div>
 
 	<form id="usersListForm">
 		<fieldset class="submits">
-			<button class="btnCancel" data-view="home" id="usersListFormCancel">Cancel</button>
+			<button class="btnCancel" data-view="home" id="usersListFormCancel">Return to App List</button>
 		</fieldset>
 	</form>
 </div>
 
-<div id="usersView" class="userForm">	
-	<form id="usersViewForm">
-		<h3>Test Users</h3>
-
-		<table class="textUserTable">
-			<thead>
-				<th>ID</th>
-				<th>Email</th>
-				<th>Password</th>
-			</thead>
-		</table>
-
-		<fieldset class="submits">
-			<button class="btnCancel" data-view="home" id="usersViewFormCancel">Cancel</button>
-		</fieldset>
-
-	</form>
-</div>
 
 <div id="log">
 	<a href="#">Show Log</a>
-	<textarea id="debug"></textarea>
+	<div id="debug"></div>
 </div>
