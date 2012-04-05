@@ -162,7 +162,7 @@ var fbt = {
 	},
 
 	message: function(s) {
-		$('#message').html(s).show();
+		$('#message').show().html(s);
 	},
 
 	resetForm: function(f, options) {
@@ -188,36 +188,23 @@ var fbt = {
 		//todo: validation
 		//todo: handle installed parameter
 		var name = $('#userCreateName').val();
-		var appid = $('#userCreateAppId').val();		
-		var token = $('#userCreateToken').val();
+		var appid = $('#userCreateFormAppId').val();		
+		var token = $('#userCreateFormToken').val();
 		var locale = $('#userCreateLocale').val();
 		var permissions = $('#userCreatePermissions').val();
-		var url = 'https://graph.facebook.com/' + appid + '/accounts/test-users?installed=true&name=' + encodeURIComponent(name) + '&locale=' + encodeURIComponent(locale) + '&permissions=' + encodeURIComponent(permissions) + '&method=post&access_token=' + token;
 
-		fbt.debug("create user: " + url);
-
-		$.ajax({
-			url: url,
-			type: 'POST',
-			dataType: "json",
-			success: function(data) {
-				console.log(data);
+		fbt.facebook.createUser(appid, name, locale, permissions, token, function(data) {
+			if (data && (data.id)) {
 				fbt.view.update('usersList', { id: appid });
-				fbt.message("User created.");
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				var copy = "Sorry, an unknown error occurred.";
-
-				if (jqXHR.responseText) {
-					var response = $.parseJSON(jqXHR.responseText);
-					if (response.error) {
-						copy += "\n" + response.error.message;
-					}
-				}
-				alert(copy);						
-				fbt.view.update('usersList', { id: appid });
+				var message = "User created.<br />ID: " + data.id + "<br />";
+				message += "Email: " + data.email + "<br />Password: " + data.password;
+				message += "<br />Please save this email and password as you will not be able to access them with this tool again."
+				fbt.message(message);
+			} else {
+				//todo: error handling
+				alert("An error occurred making a test user.");
 			}
-		});	
+		});
 	},
 
 	userEditNameFormSubmit: function() {
@@ -252,8 +239,6 @@ var fbt = {
 				alert("Error, could not update user password.");
 			}
 		});
-
-
 	},
 
 	facebook: {
@@ -264,7 +249,7 @@ var fbt = {
 			var datatype = options.dataType || "text";
 			var type = options.type || 'GET';
 			var callback = options.callback || function(data) { };
-			var caller = options.caller + ": " || '';
+			var caller = (options.caller) ? "<span class='logLabel'>" + options.caller + "</span>: " : '';
 
 			fbt.debug(caller + url);
 
@@ -280,6 +265,16 @@ var fbt = {
 					callback();
 				}
 			});	
+		},
+
+		createUser: function(appid, name, locale, permissions, token, callback) {
+			fbt.facebook.graphCall({
+				url: 'https://graph.facebook.com/' + appid + '/accounts/test-users?installed=true&name=' + name + '&locale=' + locale + '&permissions=' + permissions + '&method=post&access_token=' + token,
+				type: "POST",
+				dataType: "json",
+				callback: callback,
+				caller: "createUser"
+			});  			
 		},
 
 		deleteUser: function(userid, token, appid, callback) {
@@ -404,8 +399,8 @@ var fbt = {
 						fbt.facebook.getUserById(value.id, value.access_token, function(user) {
 
 							var html = "<li>";
-							html += '<a href="https://www.facebook.com/profile.php?id=' + user.id + '" target="_blank"><strong>' + user.name + '</strong></a>';
-							html += ' <small>(' + user.id + ')</small><br/>';
+							html += '<span class="userHead"><a href="https://www.facebook.com/profile.php?id=' + user.id + '" target="_blank"><strong>' + user.name + '</strong></a>';
+							html += ' <small>(' + user.id + ')</small></span>';
 							html += '<button class="btnEditLogin" data-id="' + user.id + '" data-href="' + value.login_url + '">Login as this user</button> ';
 							html += '<button class="btnEditUserName" data-id="' + user.id + '" data-appid="' + options.id + '" data-token="' + appData.token + '">Change Name</button> ';
 							html += '<button class="btnEditUserPassword" data-id="' + user.id + '" data-appid="' + options.id + '" data-token="' + appData.token + '">Change Password</button> ';

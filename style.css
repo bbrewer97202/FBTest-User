@@ -15,15 +15,17 @@ label { display: block; }
 
 #log { position: fixed; top: 0; left: 0; width: 100%; z-index: 100; }
 #log a { position: absolute; top: 2px; right: 5px; }
+.logLabel { color: #f00; }
 #debug { position: absolute; top: 30px; left: 0; display: none; padding: 10px; background-color: #ccc; }
 #debug div { background-color: #eee; padding: .4em 10px; margin: 5px 0; }
-#message { margin: 0; padding: 10px 20px; font-weight: bold; color: #c06; font-size: 120%; border: solid 1px #c06; display: block; background-color: #eee; }
+#message { margin: 0; padding: 10px 20px; font-weight: bold; color: #c00; font-size: 120%; border: solid 1px #c00; display: block; background-color: #eee; }
 
 #home { overflow: auto; }
 #home div { float: left; background-color: #eee; border: solid 1px #ccc; margin: 0 20px 20px 0; padding: 20px; }
 #home div p { font-size: 13px; display: block; }
 
+.userHead { display: block; padding-bottom: 4px; }
 .userListing { list-style-type: none; }
 .userListing li { display: block; padding: 10px; border: solid 1px #ccc; background-color: #eee; margin-bottom: 10px; }
-.userListing li a { font-size: 16px; color: #000; margin-bottom: 8px; }
+.userListing li a { font-size: 16px; color: #000; padding-bottom: 8px; }
 .userListing li span { color: #666; }
