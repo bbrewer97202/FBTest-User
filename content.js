@@ -1,26 +1,78 @@
 var fbt = {
+
 	debug: function(s) {
 		var d = $('#debug');
-		d.val(s + "\n" + d.val());
-		console.log("debug: " + s);
+		d.prepend('<div>' + s + "</div>");
+		//console.log("debug: " + s);
 	},
 
 	init: function() {
 
-		fbt.debug("init()");
-
-		$('.btnAction').on('click', function(e) {
+		$(document).on('click', '.btnAction', function(e) {
 			e.preventDefault();
 			fbt.view.update($(this).attr('data-view'));
 		});
 
-		$('.btnCancel').on('click', function(e) {
+		$(document).on('click', '.btnCancel', function(e) {
 			//todo: confirmation
 			e.preventDefault();
-			fbt.view.update($(this).attr('data-view'));
+			var $this = $(this);
+			var options = {};
+			if ($this.attr('data-appid')) {
+				options.id = $this.attr('data-appid');
+			}						
+			fbt.view.update($this.attr('data-view'), options);
 		});		
 
-		$('form').on('submit', function(e) {
+		$(document).on('click', '.btnEditLogin', function(e) {
+			var url = $(this).attr('data-href');
+			window.open(url, "fbLogin","status=yes,menubar=yes,resizable=yes,scrollbars=yes,toolbar=yes");
+		});
+
+		$(document).on('click', '.btnCreateTestUser', function(e) {
+			var $this = $(this);
+			fbt.view.update("userCreate", { appid: $this.attr('data-appid'), token: $this.attr('data-token') });
+		});
+
+		$(document).on('click', '.btnEditUserName', function(e) {
+			var $this = $(this);
+			fbt.view.update("userEditName", { id: $this.attr('data-id'), appid: $this.attr('data-appid'), token: $this.attr('data-token') });
+		});
+
+		$(document).on('click', '.btnEditUserPassword', function(e) {
+			var $this = $(this);
+			fbt.view.update("userEditPassword", { id: $this.attr('data-id'), appid: $this.attr('data-appid'), token: $this.attr('data-token') });
+		});		
+
+		$(document).on('click', '.btnDeleteUser', function(e) {
+			var $this = $(this);			
+			var bool = confirm("Are you sure you want to delete this user?");
+			if (bool) {
+				var appid = $this.attr('data-appid');
+				fbt.facebook.deleteUser($this.attr('data-id'), $this.attr('data-token'), appid, function(data) {
+					if (data) {
+						if (data == "true") {
+							fbt.view.update('usersList', { id: appid });
+							fbt.message("User deleted.");
+						} else {
+							if (data.error) {
+								console.log("data error: ", data);
+								if (data.error.message) {
+									alert(data.error.message);
+								}
+							}
+							fbt.view.update('usersList', { id: appid });
+						}	
+
+						alert("User deleted");
+					} else {
+						alert("An error occurred when attempting to delete this user.");
+					}
+				});
+			} 
+		})
+
+		$(document).on('click', '.btnSubmit', function(e) {
 			e.preventDefault();
 			fbt[$(this).attr('id')]();
 		});
@@ -41,13 +93,14 @@ var fbt = {
 			e.preventDefault();
 
 			//todo: add loader
-			//todo: add more robust error handling
+			//todo: add error handling
 			var appid = $('#appAddFormID').val();
 			var secret = $('#appAddFormSecret').val();			
 			if ((! appid) || (appid === "") || (! secret) || (secret === "")) {
 				alert("Please enter your app id and app secret before requesting the access token.");
 			} else {
-				fbt.facebook.getAppAccessToken(appid, secret, function(token) {
+				fbt.facebook.getAppAccessToken(appid, secret, function(data) {
+					var token = data.split("=")[1];
 					if (token) {
 						$('#appAddFormToken').val(token);	
 					} else {
@@ -58,7 +111,7 @@ var fbt = {
 		});
 
 		$('#selectApp').on('change', function(e) {
-			fbt.view.update('usersList');
+			fbt.view.update('usersList', { id: $(this).find(":selected").val() });
 		});
 
 		fbt.view.update('home');
@@ -87,7 +140,7 @@ var fbt = {
 		}
 	},
 
-	appAddForm: function() {
+	appAddFormSubmit: function() {
 		//todo: validation
 		var name = $('#appAddFormName').val();
 		var appid = $('#appAddFormID').val();
@@ -112,70 +165,185 @@ var fbt = {
 		$('#message').html(s).show();
 	},
 
+	resetForm: function(f, options) {
+
+		document.getElementById(f).reset();
+
+		//enable cancel button to return to previous view with this app id, if present
+		if (options) {
+			if (options.appid) {
+				$('#' + f + 'Cancel').attr('data-appid', options.appid);
+				$('#' + f + 'AppId').val(options.appid);
+			}
+
+			//add token to hidden field if present
+			if (options.token) {
+				$('#' + f + 'Token').val(options.token);
+			}
+		}
+	},
+
+	//handle submit of the user create form
+	userCreateFormSubmit: function() {
+		//todo: validation
+		//todo: handle installed parameter
+		var name = $('#userCreateName').val();
+		var appid = $('#userCreateAppId').val();		
+		var token = $('#userCreateToken').val();
+		var locale = $('#userCreateLocale').val();
+		var permissions = $('#userCreatePermissions').val();
+		var url = 'https://graph.facebook.com/' + appid + '/accounts/test-users?installed=true&name=' + encodeURIComponent(name) + '&locale=' + encodeURIComponent(locale) + '&permissions=' + encodeURIComponent(permissions) + '&method=post&access_token=' + token;
+
+		fbt.debug("create user: " + url);
+
+		$.ajax({
+			url: url,
+			type: 'POST',
+			dataType: "json",
+			success: function(data) {
+				console.log(data);
+				fbt.view.update('usersList', { id: appid });
+				fbt.message("User created.");
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				var copy = "Sorry, an unknown error occurred.";
+
+				if (jqXHR.responseText) {
+					var response = $.parseJSON(jqXHR.responseText);
+					if (response.error) {
+						copy += "\n" + response.error.message;
+					}
+				}
+				alert(copy);						
+				fbt.view.update('usersList', { id: appid });
+			}
+		});	
+	},
+
+	userEditNameFormSubmit: function() {
+		//todo: validation
+		var name = $('#userEditNameFormName').val();
+		var id = $('#userEditNameFormUserId').val();
+		var appid = $('#userEditNameFormAppId').val();
+		var token = $('#userEditNameFormToken').val();
+
+		fbt.facebook.updateUserName(id, name, token, function(data) {
+			if (data && (data == "true")) {
+				fbt.view.update('usersList', { id: appid });
+				fbt.message("User name updated");
+			} else {
+				alert("Error, could not update user name. Facebook does not accept all values as valid.");
+			}
+		});
+	},
+
+	userEditPasswordFormSubmit: function() {
+		//todo: validation
+		var password = $('#userEditPasswordFormPassword').val();
+		var id = $('#userEditPasswordFormUserId').val();
+		var appid = $('#userEditPasswordFormAppId').val();
+		var token = $('#userEditPasswordFormToken').val();
+
+		fbt.facebook.updateUserPassword(id, password, token, function(data) {
+			if (data && (data == "true")) {
+				fbt.view.update('usersList', { id: appid });
+				fbt.message("User password updated");
+			} else {
+				alert("Error, could not update user password.");
+			}
+		});
+
+
+	},
+
 	facebook: {
-		getTestUsersByAppId: function(appid, token, callback) {
-			var url = "https://graph.facebook.com/" + appid + "/accounts/test-users?access_token=" + token;
-	  		fbt.debug(url);
+
+		graphCall: function(options) {
+		
+			var url = options.url || ''; //?
+			var datatype = options.dataType || "text";
+			var type = options.type || 'GET';
+			var callback = options.callback || function(data) { };
+			var caller = options.caller + ": " || '';
+
+			fbt.debug(caller + url);
+
 			$.ajax({
 				url: url,
-				dataType: "json",
+				type: type,
+				dataType: datatype,
 				success: function(data) {
-					fbt.debug("getTestUsersByAppId: response: " + data);
 					callback(data);
 				},
-				error: function() {
-					fbt.debug("getTestUsersByAppId: request error");
+				error: function(jqXHR, textStatus, errorThrown) {
+					//todo: completely revisit this and flesh out error handling
 					callback();
 				}
-			});	  		
+			});	
+		},
+
+		deleteUser: function(userid, token, appid, callback) {
+			fbt.facebook.graphCall({
+				url: "https://graph.facebook.com/" + userid + "?method=delete&access_token=" + token,
+				dataType: "json",
+				callback: callback,
+				caller: "deleteUser"
+			});  			
+		},
+
+		getTestUsersByAppId: function(appid, token, callback) {
+			fbt.facebook.graphCall({
+				url: "https://graph.facebook.com/" + appid + "/accounts/test-users?access_token=" + token,
+				dataType: "json",
+				callback: callback,
+				caller: "getTestUsersByAppId"
+			});
 		},
 
 		getAppAccessToken: function(appid, appsecret, callback) {
-			var url = "https://graph.facebook.com/oauth/access_token?client_id=" + appid + "&client_secret=" + appsecret + "&grant_type=client_credentials";
-			fbt.debug("getAppAccessToken: " + url);
-			$.ajax({
-				url: url,
-				success: function(data) {
-					fbt.debug("getAppAccessToken: response: " + data);
-					var token = data.split("=")[1];
-					callback(token);
-				},
-				error: function() {
-					fbt.debug("getAppAccessToken: request error");
-					callback();
-				}
+			fbt.facebook.graphCall({
+				url: "https://graph.facebook.com/oauth/access_token?client_id=" + appid + "&client_secret=" + appsecret + "&grant_type=client_credentials",
+				callback: callback,
+				caller: "getAppAccessToken"
 			});
 		},
 
 		getUserById: function(id, token, callback) {
-			var url = "https://graph.facebook.com/" + id + "/?access_token=" + token;
-	  		fbt.debug("getUserById: " + url);
-			$.ajax({
-				url: url,
+			fbt.facebook.graphCall({
+				url: "https://graph.facebook.com/" + id + "/?access_token=" + token,
 				dataType: "json",
-				success: function(data) {
-					fbt.debug("getUserById: response: " + data);
-					callback(data);
-				},
-				error: function() {
-					fbt.debug("getUserById: request error");
-					callback();
-				}
-			});	 
+				callback: callback,
+				caller: "getUserById"
+			});
+		}, 
+
+		updateUserName: function(id, name, token, callback) {
+			fbt.facebook.graphCall({
+				url: "https://graph.facebook.com/" + id + "?&name=" + name + "&method=post&access_token=" + token,
+				callback: callback,
+				caller: "updateUserName"
+			});
+		},
+
+		updateUserPassword: function(id, password, token, callback) {
+			fbt.facebook.graphCall({
+				url: "https://graph.facebook.com/" + id + "?&password=" + password + "&method=post&access_token=" + token,
+				callback: callback,
+				caller: "updateUserPassword"
+			});
 		}
 	},
 
 	view: {
 
 		appAdd: function() {
-			document.getElementById('appAddForm').reset();
+			fbt.resetForm('appAddForm');
 		},
 
 		home: function() {
 			var apps = fbt.appListGet();	
 			var select = $('#selectApp');
 			select.empty();
-			console.log(apps);
 			select.append('<option value="">Select an App</option>');
 
 			$.each(apps.apps, function(index, value) {
@@ -183,44 +351,73 @@ var fbt = {
 			});
 		},
 
-		update: function(id) {
+		update: function(id, options) {
+			options = (options) ? options : {};
 			$('.userForm').hide();
-			fbt.view[id]();
+			fbt.view[id](options);
 			$('#' + id).show();
 		},
 
-		usersList: function() {
-			//todo: lame, do this with parameter passing
-			var id = $('#selectApp').find(":selected").val();
-			var appData = fbt.appDataGetById(id);
-			var list = $('#usersListListing');
+		userCreate: function(options) {
+
+			fbt.resetForm('userCreateForm', options);
+		},
+
+		userEditName: function(options) {
+
+			var appData = fbt.appDataGetById(options.appid);		
+			fbt.resetForm('userEditNameForm', options);		
+			$('#userEditNameFormUserId').val(options.id);
+
+			//get data on requested user
+			fbt.facebook.getUserById(options.id, appData.token, function(user) {
+				$("#userEditNameFormName").val(user.name);
+			});
+		},
+
+		userEditPassword: function(options) {
+
+			var appData = fbt.appDataGetById(options.appid);
+			fbt.resetForm('userEditPasswordForm', options);
+			$('#userEditPasswordFormUserId').val(options.id);
+		},
+
+		usersList: function(options) {
+
+			var appData = fbt.appDataGetById(options.id);
+			var list = $('#usersListListing .userListing');
 
 			list.empty();
 
-			$('#usersList h3').text("Test Users for " + appData.name);
+			$('#usersList h3').text(appData.name);
+			$('#usersList h5').text("Existing Test Users for " + appData.name);
+
+			//associate app with create button
+			$('#userListCreateUser').attr({
+				"data-appid": appData.appid,
+				"data-token": appData.token
+			});
 
 			fbt.facebook.getTestUsersByAppId(appData.appid, appData.token, function(data) {
 				if (data) {
-					console.log(data);
 					$.each(data.data, function(index, value) {
 						fbt.facebook.getUserById(value.id, value.access_token, function(user) {
 
-							var html = '<div class="userListingHead"><span>' + user.name + '</span>';
-							html += '<button class="btnEditUser" data-id="' + user.id + '">Edit</button>';
-							html += '<button class="btnDeleteUser" data-id="' + user.id + '">Delete</button>';
-							html += '</div>';
-							html += '<table class="userListing"><tbody>';						
-							html += '<tr><td class="key">ID:</td><td><a href="https://www.facebook.com/profile.php?id=' + user.id + '" target="_blank">' + user.id + '</a></td></tr>';
-							html += '<tr><td class="key">Gender:</td><td>' + user.gender + '</td></tr>';
-							html += '<tr><td class="key">Login:</td><td><a href="' + value.login_url + '" target="_blank">Login Link</a></td></tr>';		
-							html += '<tr><td class="key">Access Token:</td><td>' + value.access_token + '</td></tr></tbody>';
-							html += '</table>';
+							var html = "<li>";
+							html += '<a href="https://www.facebook.com/profile.php?id=' + user.id + '" target="_blank"><strong>' + user.name + '</strong></a>';
+							html += ' <small>(' + user.id + ')</small><br/>';
+							html += '<button class="btnEditLogin" data-id="' + user.id + '" data-href="' + value.login_url + '">Login as this user</button> ';
+							html += '<button class="btnEditUserName" data-id="' + user.id + '" data-appid="' + options.id + '" data-token="' + appData.token + '">Change Name</button> ';
+							html += '<button class="btnEditUserPassword" data-id="' + user.id + '" data-appid="' + options.id + '" data-token="' + appData.token + '">Change Password</button> ';
+							html += '<button class="btnDeleteUser" data-id="' + user.id + '" data-appid="' + appData.appid + '" data-token="' + appData.token + '">Delete User</button> ';
+							html += "</li>";
 							list.append(html);
+
 						});
 					});
 				} else {
 					//todo: better error handling
-					alert("An error occurred with this request.");
+					list.append('<li>Could not retrieve users</li>');
 				}
 			});
 		}
