@@ -1,12 +1,20 @@
 {
-  "name": "FBT2",
-  "version": "1.0",
-  "description": "Manage Test Users",
+  "manifest_version": 2,
+
+  "name": "FB Test User 2",
+  "description": "Manage Facebook Test Users",
+  "version": "2.0",
+
   "browser_action": {
-    "default_icon": "icon.png",
-    "popup": "popup.html"
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
   },
   "permissions": [
+    "tabs",
     "https://graph.facebook.com/*"
   ]
 }

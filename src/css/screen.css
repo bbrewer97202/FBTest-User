@@ -1,0 +1,144 @@
+html, body {
+    height:100%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+}
+
+.fbtContent {
+    height: 100%;
+}
+
+.fbtView {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.fbtViewContainer {
+    display: table-cell;
+    height: 100%;
+    vertical-align: top;
+}
+
+.fbtViewContainerControls {
+    width: 30%;
+    /*background-color: #BD274A;*/ /* red */
+    background: #7a7a7a; /* Old browsers */
+    background: -moz-linear-gradient(45deg,  #7a7a7a 0%, #999999 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#7a7a7a), color-stop(100%,#999999)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(45deg,  #7a7a7a 0%,#999999 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(45deg,  #7a7a7a 0%,#999999 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(45deg,  #7a7a7a 0%,#999999 100%); /* IE10+ */
+    background: linear-gradient(45deg,  #7a7a7a 0%,#999999 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7a7a7a', endColorstr='#999999',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+}
+
+.fbtViewContainerContent {
+    width: 70%;
+    padding: 1.0em;
+    background-color: #F7F1E3;
+}
+
+.fbtSidebar {
+    padding: 1.0em;
+    height: 100%;
+}
+
+h2 {
+    font-size: 1.6em;
+}
+
+h3 {
+    font-size: 1.3em;
+}
+
+.fbtNotice {
+    color: #666;
+    font-style: italic;
+    margin: 1em 0;
+}
+
+/**********************************************************************
+ * form elements
+ *********************************************************************/
+label {
+    display: block;    
+}
+
+.fbtCTAContainer {
+    text-align: center;
+}
+
+.fbtCTAButton {
+    margin: 0 auto 0.6em auto;
+}
+
+.fbtComponent {
+    padding: 0em 2.0em 1em 2.0em;
+}
+
+.formRow {
+    margin: 0 0 1em 0;
+}
+
+.formCTARow {
+    margin: 1em 0;
+}
+
+.input-large {
+    width: 50%;
+}
+
+
+/**********************************************************************
+ *
+ *********************************************************************/
+.fbAppList {
+    background-color: #f8f8f8;
+    overflow-y: auto;
+    margin: 0 0 1em 0;
+    height: 80%;
+    border-radius: 0.3em;
+}
+
+.fbAppList ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.fbAppList li {
+    margin: 0;
+    padding: 0;
+}
+
+.fbAppList a { 
+    display: block;
+    text-decoration: none;
+    padding: 0.2em 0.2em 0.2em 0.4em;
+    cursor: pointer;
+}
+
+.fbAppList a:hover {
+    color: #fff;
+    background-color: rgba(181, 189, 100, 0.6);
+}
+
+.fbAppList a.selected {
+    color: white;
+    /*background-color: rgba(255, 139, 12, 1.0);*/ /* orange */
+    background-color: rgba(181, 189, 100, 1.0);
+}
+
+/**********************************************************************
+ *
+ *********************************************************************/
+.testUserListing {
+    border-radius: 0.3em;
+    margin: 0 0 1em 0;
+    padding: 1.0em;
+    /*background-color: #B5BD64;*/ /* green */
+    background-color: #999;
+    color: white;
+}
