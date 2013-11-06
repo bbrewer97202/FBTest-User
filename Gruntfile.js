@@ -50,7 +50,7 @@ module.exports = function(grunt) {
       chrome : {
         options: {
           context : {
-            ENV: "chrome"
+            ENV: "dev"
           }
         },        
         src : '<%= config.src.html %>',
@@ -71,16 +71,16 @@ module.exports = function(grunt) {
 
   });
 
+  //lib
+  grunt.loadNpmTasks('grunt-angular-templates');
+  grunt.loadNpmTasks('grunt-contrib-connect')
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-preprocess');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.loadNpmTasks('grunt-contrib-connect')
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-preprocess');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-
-    grunt.registerTask('default', ['concat:dev', 'preprocess:dev']);
-
-    grunt.registerTask('chrome', ['concat:chrome', 'preprocess:chrome']);
-
-    grunt.registerTask('server', ['connect']);
+  //tasks
+  grunt.registerTask('default', ['concat:dev', 'preprocess:dev']);
+  grunt.registerTask('chrome', ['concat:chrome', 'preprocess:chrome']);
+  grunt.registerTask('server', ['connect']);
 
 }

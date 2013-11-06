@@ -8,7 +8,8 @@ module.exports = {
     html: 'www/index.html',
     js: {
       vendor: 'www/js/vendor.js',
-      app: 'www/js/app.js'
+      app: 'www/js/app.js',
+      templates: 'www/js/templates.js'
     }
   },
   chrome: {
