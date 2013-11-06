@@ -1,4 +1,4 @@
-/*! fbt - v0.0.6 - 2013-11-05 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
+/*! fbt - v0.0.6 - 2013-11-06 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
 
 fbt.config(['$routeProvider', function($routeProvider) {
 
@@ -10,19 +10,19 @@ fbt.config(['$routeProvider', function($routeProvider) {
     //routing
     $routeProvider.
         when('/facebookapp/:id', {
-            templateUrl: 'views/facebook-app-form.html',
+            templateUrl: 'facebook-app-form.html',
             controller: 'facebookAppEditorController'
         }).
         when('/facebookapp', {
-            templateUrl: 'views/facebook-app-form.html',
+            templateUrl: 'facebook-app-form.html',
             controller: 'facebookAppAddNewController'
         }).  
         when('/testusercreate', {
-            templateUrl: 'views/test-user-create.html',
+            templateUrl: 'test-user-create.html',
             controller: 'testUserCreateController'
         }).                
         otherwise({
-            templateUrl: 'views/facebook-app.html',
+            templateUrl: 'facebook-app.html',
             controller: 'facebookAppController'
         });   
 
@@ -548,7 +548,7 @@ fbt.controller('testUserCreateController', [
 fbt.directive('facebookAppList', function() {
     return {
         restrict: 'A',
-        templateUrl: 'views/facebook-app-list.html',
+        templateUrl: 'facebook-app-list.html',
         replace: true,
         scope: {
             fbApps: '&'
@@ -604,7 +604,7 @@ fbt.directive('facebookAppList', function() {
 fbt.directive('testUserList', function() {
     return {
         restrict: 'A',
-        templateUrl: 'views/test-user-list.html',
+        templateUrl: 'test-user-list.html',
 
         link: function (scope, element, attrs) {
 

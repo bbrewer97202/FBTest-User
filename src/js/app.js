@@ -13,19 +13,19 @@ fbt.config(['$routeProvider', function($routeProvider) {
     //routing
     $routeProvider.
         when('/facebookapp/:id', {
-            templateUrl: 'views/facebook-app-form.html',
+            templateUrl: 'facebook-app-form.html',
             controller: 'facebookAppEditorController'
         }).
         when('/facebookapp', {
-            templateUrl: 'views/facebook-app-form.html',
+            templateUrl: 'facebook-app-form.html',
             controller: 'facebookAppAddNewController'
         }).  
         when('/testusercreate', {
-            templateUrl: 'views/test-user-create.html',
+            templateUrl: 'test-user-create.html',
             controller: 'testUserCreateController'
         }).                
         otherwise({
-            templateUrl: 'views/facebook-app.html',
+            templateUrl: 'facebook-app.html',
             controller: 'facebookAppController'
         });   
 

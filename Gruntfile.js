@@ -37,6 +37,23 @@ module.exports = function(grunt) {
       }      
     },
 
+    ngtemplates: {
+      options: {
+        module: 'fbt',
+        url: function(url) { 
+          return url.replace('src/html/partials/', ''); 
+        },
+        htmlmin: {
+          collapseWhitespace: true,
+          removeComments: true
+        }
+      },      
+      app: {
+        src: '<%= config.src.js.templates %>',
+        dest: '<%= config.dev.js.templates %>'
+      }
+    },
+
     preprocess : {
       dev : {
         options: {
@@ -66,6 +83,10 @@ module.exports = function(grunt) {
       html: {
         files: ['<%= config.src.html %>'],
         tasks: ['preprocess:dev']
+      },
+      templates: {
+        files: ['<%= config.dev.js.templates %>'],
+        tasks: ['ngtemplates']
       }
     }
 
@@ -79,8 +100,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   //tasks
-  grunt.registerTask('default', ['concat:dev', 'preprocess:dev']);
-  grunt.registerTask('chrome', ['concat:chrome', 'preprocess:chrome']);
+  grunt.registerTask('default', ['concat:dev', 'ngtemplates', 'preprocess:dev']);
+  grunt.registerTask('chrome', ['concat:chrome', 'ngtemplates', 'preprocess:chrome']);
   grunt.registerTask('server', ['connect']);
 
 }

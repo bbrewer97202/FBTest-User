@@ -34,7 +34,8 @@ module.exports = {
         'src/js/vendor/bower_components/angular/angular.min.js',
         'src/js/vendor/bower_components/angular-route/angular-route.min.js',
         'src/js/vendor/angular-local-storage.js'
-      ]
+      ],
+      templates: 'src/html/partials/*'
     }
   }
 };

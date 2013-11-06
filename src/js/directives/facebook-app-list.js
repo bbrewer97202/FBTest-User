@@ -4,7 +4,7 @@
 fbt.directive('facebookAppList', function() {
     return {
         restrict: 'A',
-        templateUrl: 'views/facebook-app-list.html',
+        templateUrl: 'facebook-app-list.html',
         replace: true,
         scope: {
             fbApps: '&'

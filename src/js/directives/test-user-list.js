@@ -4,7 +4,7 @@
 fbt.directive('testUserList', function() {
     return {
         restrict: 'A',
-        templateUrl: 'views/test-user-list.html',
+        templateUrl: 'test-user-list.html',
 
         link: function (scope, element, attrs) {
 
