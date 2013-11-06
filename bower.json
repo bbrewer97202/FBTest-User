@@ -1,0 +1,21 @@
+{
+  "name": "FBT2",
+  "version": "0.0.1",
+  "authors": [
+    "bbrewer97202@yahoo.com"
+  ],
+  "description": "Manage Facebook Test Users",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/vendor/bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular": "1.2.0-rc.3",
+    "angular-route": "~1.2.0-rc.3"
+  }
+}

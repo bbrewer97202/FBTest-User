@@ -1,0 +1,33 @@
+<!-- facebook app editor -->
+<h2 ng-show="isEditMode">Edit Facebook app</h2>
+<h2 ng-show="! isEditMode">Add Facebook app</h2>
+<div class="fbtComponent">    
+    <form name="facebookAppEditorForm" novalidate ng-show="isValidID">
+        <div class="formRow">
+            <label>Name:</label>
+            <input type="text" name="appName" ng-model="appUpdates.appName" required class="input-large">
+            <span class="error" ng-show="facebookAppEditorForm.appName.$dirty && facebookAppEditorForm.appName.$invalid">Please enter a name used to refer to your app.</span>
+        </div>
+        <div class="formRow">
+            <label>App ID:</label>
+            <input type="text" name="appID" ng-model="appUpdates.appID" required class="input-large">
+            <span class="error" ng-show="facebookAppEditorForm.appID.$dirty && facebookAppEditorForm.appID.$invalid">Please enter the Facebook app ID.</span>
+        </div>
+        <div class="formRow">
+            <label>App Secret:</label>
+            <input type="text" name="appSecret" ng-model="appUpdates.appSecret" required class="input-large">
+            <span class="error" ng-show="facebookAppEditorForm.appSecret.$dirty && facebookAppEditorForm.appSecret.$invalid">Please enter the Facebook app secret.</span>
+        </div>
+        <div class="formRow">
+            <label>App Access Token:</label>
+            <input type="text" name="appToken" ng-model="appUpdates.appToken" required class="input-large">
+            <span class="error" ng-show="facebookAppEditorForm.appToken.$dirty && facebookAppEditorForm.appToken.$invalid">Please enter the Facebook app access token.</span>
+            <div><button ng-click="getAppAccessToken(appUpdates.appID, appUpdates.appSecret)" ng-disabled="facebookAppEditorForm.appID.$invalid || facebookAppEditorForm.appSecret.$invalid">Retrieve app access token</button></div>            
+        </div>
+        <div class="formRow formCTARow">
+            <button ng-click="submit(appUpdates)" ng-disabled="(isEditMode && isUnchanged(appUpdates)) || (facebookAppEditorForm.$invalid || isUnchanged(appUpdates))">Save</button>
+            <button ng-click="cancel()">Cancel</button>
+        </div>
+    </form>
+    <span class="error" ng-show="!isValidID">Invalid ID.</span>
+</div>

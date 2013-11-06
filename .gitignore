@@ -1,0 +1,3 @@
+node_modules
+src/vendor/bower_components
+.DS_Store
