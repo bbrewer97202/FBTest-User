@@ -1,4 +1,4 @@
-/*! fbt - v0.0.6 - 2013-11-06 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
+/*! fbt - v0.0.6 - 2013-11-07 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
 
 fbt.config(['$routeProvider', function($routeProvider) {
 

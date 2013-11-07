@@ -37,6 +37,21 @@ module.exports = function(grunt) {
       }      
     },
 
+    cssmin: {
+      combine: {
+        files: {
+          '<%= config.dev.css %>': ['<%= config.src.css %>']
+        }
+      }
+      // minify: {
+      //   cwd: '<%= config.src.css %>',
+      //   expand: true,
+      //   src: ['*.css'],
+      //   dest: '<%= config.dev.css %>',
+      //   ext: '.css'
+      // }
+    },
+
     ngtemplates: {
       options: {
         module: 'fbt',
@@ -76,6 +91,10 @@ module.exports = function(grunt) {
     },
 
     watch: {
+      css: {
+        files: ['<%= config.src.css %>'],
+        tasks: ['cssmin:combine']
+      },      
       js: {
         files: ['<%= config.src.js.app %>'],
         tasks: ['concat:dev']
@@ -85,7 +104,7 @@ module.exports = function(grunt) {
         tasks: ['preprocess:dev']
       },
       templates: {
-        files: ['<%= config.dev.js.templates %>'],
+        files: ['<%= config.src.js.templates %>'],
         tasks: ['ngtemplates']
       }
     }
@@ -96,11 +115,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-angular-templates');
   grunt.loadNpmTasks('grunt-contrib-connect')
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-preprocess');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   //tasks
-  grunt.registerTask('default', ['concat:dev', 'ngtemplates', 'preprocess:dev']);
+  grunt.registerTask('default', ['concat:dev', 'ngtemplates', 'preprocess:dev', 'cssmin:combine']);
   grunt.registerTask('chrome', ['concat:chrome', 'ngtemplates', 'preprocess:chrome']);
   grunt.registerTask('server', ['connect']);
 

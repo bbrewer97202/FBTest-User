@@ -22,7 +22,7 @@
             <label>App Access Token:</label>
             <input type="text" name="appToken" ng-model="appUpdates.appToken" required class="input-large">
             <span class="error" ng-show="facebookAppEditorForm.appToken.$dirty && facebookAppEditorForm.appToken.$invalid">Please enter the Facebook app access token.</span>
-            <div><button ng-click="getAppAccessToken(appUpdates.appID, appUpdates.appSecret)" ng-disabled="facebookAppEditorForm.appID.$invalid || facebookAppEditorForm.appSecret.$invalid">Retrieve app access token</button></div>            
+            <div class="fbtCTAGrouped"><button ng-click="getAppAccessToken(appUpdates.appID, appUpdates.appSecret)" ng-disabled="facebookAppEditorForm.appID.$invalid || facebookAppEditorForm.appSecret.$invalid">Retrieve app access token</button></div>            
         </div>
         <div class="formRow formCTARow">
             <button ng-click="submit(appUpdates)" ng-disabled="(isEditMode && isUnchanged(appUpdates)) || (facebookAppEditorForm.$invalid || isUnchanged(appUpdates))">Save</button>

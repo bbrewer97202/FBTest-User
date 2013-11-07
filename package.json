@@ -10,6 +10,7 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-preprocess": "~3.0.1",
-    "grunt-angular-templates": "~0.4.7"
+    "grunt-angular-templates": "~0.4.7",
+    "grunt-contrib-cssmin": "~0.7.0"
   }
 }

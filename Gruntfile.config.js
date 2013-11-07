@@ -5,6 +5,7 @@ module.exports = {
 
   //targets
   dev: {
+    css: 'www/css/screen.css',
     html: 'www/index.html',
     js: {
       vendor: 'www/js/vendor.js',
@@ -13,6 +14,7 @@ module.exports = {
     }
   },
   chrome: {
+    css: 'chrome-extension/css/screen.css',
     html: 'chrome-extension/index.html',
     js: {
       vendor: 'chrome-extension/js/vendor.js',
@@ -22,6 +24,7 @@ module.exports = {
 
   //source files
   src: {
+    css: 'src/css/*.css',
     html: 'src/html/index.html',
     js: {
       app: [

@@ -1,7 +1,7 @@
 <div class="fbtComponent"> 
     <h3>Test Users</h3>
     <div ng-repeat="testUser in testUsers" class="testUserListing">
-        <div><strong>{{testUser.user.name}}</strong> ({{testUser.id}})</div>
+        <h5>{{testUser.user.name}} ({{testUser.id}})</h5>
 
         <button ng-click="openProfilePage('https://www.facebook.com/profile.php?id=' + testUser.user.id)">Profile Page</button>
         <button ng-click="loginAsUser(testUser.login_url)">Login as {{testUser.user.first_name}}</button> 
