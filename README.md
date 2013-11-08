@@ -1,4 +1,29 @@
-Initial migration to v2
+#FB-TestUser
+Browser based console for managing Facebook Test Users.
 
-=Chrome Extension
-At some point I'd like to support this as a chrome extension, but this is currently not working.  The open issues are around sandboxing the app within the Chrome security restrictions and getting angular.js to work as expected in the extension context.
+## Getting Started
+Install the node dependencies
+```shell
+npm install 
+```
+
+Install the bower dependencies
+```shell
+bower install 
+```
+
+Start a local server
+Install the node dependencies
+```shell
+grunt server
+```
+
+Then visit
+http://localhost:8888
+
+
+Click on "Add New App" and enter the requested information about your Facebook app.  This information is stored in your browser local-storage and is not sent anywhere. You only need to enter this information once.  For each saved app, you may add delete and edit app test users.
+
+
+###Notes
+At some point this will be turned into a Chrome extension.  
