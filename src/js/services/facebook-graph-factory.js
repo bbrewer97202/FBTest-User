@@ -112,6 +112,23 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
             return deferred.promise;
 
+        },
+
+        deleteTestUser: function(userID, appToken) {
+
+            var deferred = $q.defer();
+            var url = "https://graph.facebook.com/" + userID + "?method=delete&access_token=" + appToken;
+
+            $http.get(url).
+                success(function(data, status, headers, config) {
+                    deferred.resolve(data);
+                }).
+                error(function(data, status, headers, config) {
+                    //todo
+                    deferred.reject(data);
+                });
+
+            return deferred.promise;
         }
     }
 }]);

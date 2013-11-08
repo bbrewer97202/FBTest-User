@@ -64,24 +64,19 @@ fbt.directive('testUserList', function() {
                 fbtUtilities.openBlankWindowToURL(url);
             }
 
-            $scope.deleteTestUser = function(userid, appToken) {
-                alert("Delete: " + appToken);
-                //todo, make this real
-                //https://graph.facebook.com/TEST_USER_ID?method=delete&access_token=TEST_USER_ACCESS_TOKEN (OR) APP_ACCESS_TOKEN
+            $scope.deleteTestUser = function(userId, appToken) {
 
-                /*
-                    Response
-                    true on success, false otherwise
-
-                    Error Codes
-                    API_EC_TEST_ACCOUNTS_CANT_DELETE (2903) : Test user is associated with multiple apps.
-                    API_EC_TEST_ACCOUNTS_CANT_REMOVE_APP (2902) : Test user must be associated with at least one app.
-                    API_EC_TEST_ACCOUNTS_INVALID_ID (2901): Test user is not associated with this app.
-                */                
+                var confirmMsg = confirm("Are you sure you want to delete this user?");
+                if (confirmMsg) {
+                    facebookGraphFactory.deleteTestUser(userId, appToken).
+                        then(function(result) {
+                            $scope.getTestUserList();
+                        }, function(error) {
+                            //todo: handle this
+                            alert("delete user error" + error);
+                        });
+                }
             }
-
-
-
         }]
     }
 });

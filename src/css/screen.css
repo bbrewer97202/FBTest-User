@@ -66,15 +66,18 @@ h3 {
 button {
     border: 0;
     padding: 0.6em;
-    background-color: #b5bd64;
-    color: #504e48;
+    /*background-color: #b5bd64;*/
+    background-color: #85ab84;
+    /*color: #504e48;*/
+    color: #f2f7ea;
     border-radius: 0.3em;
     font-size: 0.8rem;
     cursor: pointer;
 }
 
 button:hover {
-    color: #f2f7ea;
+    /*color: #f2f7ea;*/
+    color: white;
 }
 
 button:disabled,
@@ -98,6 +101,10 @@ label {
 
 .fbtCTAButton {
     margin: 0 auto 0.6em auto;
+}
+
+.fbtCTAGrouped {
+    margin: 0.6em 0 0 0;
 }
 
 .fbtComponent {
@@ -163,7 +170,9 @@ input[type="text"] {
 .fbAppList a.selected {
     color: #504e48;
     /*background-color: rgba(255, 139, 12, 1.0);*/ /* orange */
-    background-color: rgba(181, 189, 100, 1.0);
+    /* background-color: rgba(181, 189, 100, 1.0); */
+    /*background-color: #b5bd64;*/ /* green */
+    background-color: #85ab84;
 }
 
 /**********************************************************************
@@ -174,8 +183,10 @@ input[type="text"] {
     margin: 0 0 1em 0;
     padding: 1.0em;
     /*background-color: #B5BD64;*/ /* green */
-    background-color: #999;
-    color: white;
+    /*background-color: #999;*/
+    background-color: rgba(153, 153, 153, 0.32);
+    /*color: white;*/
+    color: #000;
 }
 
 .testUserListing h5 {
