@@ -26,15 +26,17 @@ fbt.directive('testUserList', function() {
 
             $scope.getTestUserList = function() {
 
-                if ((typeof($scope.currentApp.appID) === "string") && (typeof($scope.currentApp.appToken) === "string")) {
-                    facebookGraphFactory.getTestUsers($scope.currentApp.appID, $scope.currentApp.appToken).
-                        then(function(result) {                        
-                            $scope.testUsers = result.data;
-                            $scope.getTestUserDetails();
-                        }, function(error) {
-                            //todo: handle this 
-                            console.log("getTestUsers: ERROR: " + error);
-                        });
+                if ($scope.currentApp) {
+                    if ((typeof($scope.currentApp.appID) === "string") && (typeof($scope.currentApp.appToken) === "string")) {
+                        facebookGraphFactory.getTestUsers($scope.currentApp.appID, $scope.currentApp.appToken).
+                            then(function(result) {                        
+                                $scope.testUsers = result.data;
+                                $scope.getTestUserDetails();
+                            }, function(error) {
+                                //todo: handle this 
+                                console.log("getTestUsers: ERROR: " + error);
+                            });
+                    }
                 }
             }
 

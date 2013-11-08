@@ -1,6 +1,6 @@
 <!-- @if ENV!='chrome' -->
 <!doctype html>
-<html ng-app="fbt" ng-csp>
+<html ng-app="fbt">
 <head>
     <title></title>
 <!-- @endif -->    
@@ -13,11 +13,11 @@
 <body>
 <!-- @endif -->
 
-<article class="fbtContent">
+<article class="fbtContent" ng-controller="appController">    
 
     <div class="fbtView">
         <section class="fbtViewContainer fbtViewContainerControls">
-            <div facebook-app-list></div>
+            <div facebook-app-list appid="{{fbAppID}}"></div>
         </section>
         <section class="fbtViewContainer fbtViewContainerContent">
             <div ng-view></div>

@@ -2,8 +2,8 @@
  * //todo: how much code between edit version and new version of form can be shared
  ****************************************************************************************/
 fbt.controller('facebookAppEditorController', 
-    ['$scope', '$location', 'fbtAppService', 'facebookGraphFactory', 'facebookAppsFactory', 
-    function($scope, $location, fbtAppService, facebookGraphFactory, facebookAppsFactory) {
+    ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
+    function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
     
     //get the index parameter
     //todo: must be a better way to do this ($routeprovider not be trusted?)
@@ -26,8 +26,7 @@ fbt.controller('facebookAppEditorController',
 
         facebookAppsFactory.updateAppByIndex(id, $scope.appDetails).
             then(function(result) {
-                fbtAppService.setCurrentApp(result.app, result.index);
-                $location.path("/");                
+                $location.path("/").search({ appID: result.app.appID });
             }, function(error) {
                 //todo handle this like the others
                 console.log("error: ", error);

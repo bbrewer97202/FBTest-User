@@ -53,6 +53,7 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
 
                         for (var i=0; i < resultsLength; i++) {
                             if (result[i].appID === id) {
+                                console.log("winner: " + i + "== ", result[i]);
                                 deferred.resolve(result[i]);
                                 break;
                             }

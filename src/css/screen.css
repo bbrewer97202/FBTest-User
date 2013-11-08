@@ -168,11 +168,23 @@ input[type="text"] {
 }
 
 .fbAppList a.selected {
-    color: #504e48;
+    /*color: #504e48;*/
+    color: #f2f7ea;
     /*background-color: rgba(255, 139, 12, 1.0);*/ /* orange */
     /* background-color: rgba(181, 189, 100, 1.0); */
     /*background-color: #b5bd64;*/ /* green */
     background-color: #85ab84;
+}
+
+/**********************************************************************
+ *
+ *********************************************************************/
+.fbtFBAppHeader h2 {
+    margin-bottom: 0.2em;
+}
+
+.fbtFBAppHeader h6 {
+    margin-top: 0;
 }
 
 /**********************************************************************

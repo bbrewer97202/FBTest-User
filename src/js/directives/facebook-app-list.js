@@ -5,15 +5,33 @@ fbt.directive('facebookAppList', function() {
     return {
         restrict: 'A',
         templateUrl: 'facebook-app-list.html',
-        replace: true,
-        scope: {
-            fbApps: '&'
+
+        link: function (scope, element, attrs) {
+
+            //the current appid is passed into directive as attribute
+            scope.$watch(function() {
+                return {
+                    appid: attrs.appid
+                }
+            }, function (newValue, oldValue, scope) {
+
+                var appsLength = scope.fbApps.length;
+                scope.appID = newValue.appid;
+
+                //use passed appid value to highlight current item
+                for (var i=0; i < appsLength; i++) {
+                    if (newValue.appid === scope.fbApps[i].appID) {
+                        scope.selectedIndex = i;
+                        break;
+                    }
+                }
+            }, true);
         },
-        controller: ['$scope', '$location', 'fbtAppService', 'facebookAppsFactory', 
-            function($scope, $location, fbtAppService, facebookAppsFactory) {
+
+        controller: ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
 
             $scope.fbApps = [];
-            $scope.selectedIndex;
+            $scope.selectedIndex;            
 
             $scope.getAppList = function() {                
                 facebookAppsFactory.getAllApps().
@@ -32,27 +50,14 @@ fbt.directive('facebookAppList', function() {
             $scope.selectApp = function(index) {
 
                 $scope.selectedIndex = index;
-                
-                //save to service the data of the current app and the index of the selected item             
-                fbtAppService.setCurrentApp($scope.fbApps[index], index);
-                
 
-                $location.path("/");
+                $location.path("/").search({ 
+                    appid: $scope.fbApps[index].appID 
+                });
             }
 
-            //watch for changes to the fbtAppService to know if a new app has been selected
-            $scope.$watch(
-                function() {
-                    return fbtAppService.getCurrentApp().index;
-                }, 
-                function(newValue, oldValue) {
-                    $scope.selectedIndex = fbtAppService.getCurrentApp().index;                   
-                    $scope.getAppList();
-                }, true);            
+            $scope.getAppList(); 
 
-        }],
-        link: function(scope, element, attrs, ctrl) {
-            scope.getAppList();
-        }
+        }]
     }
 });

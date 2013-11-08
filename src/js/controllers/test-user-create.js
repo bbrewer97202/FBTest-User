@@ -2,8 +2,8 @@
  *
  ****************************************************************************************/
 fbt.controller('testUserCreateController', [
-    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'fbtAppService', 'facebookGraphFactory', 
-    function($scope, $location, $routeParams, facebookAppsFactory, fbtAppService, facebookGraphFactory) {
+    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'facebookGraphFactory', 
+    function($scope, $location, $routeParams, facebookAppsFactory, facebookGraphFactory) {
 
         $scope.appDetails = {};
         $scope.testUser = {

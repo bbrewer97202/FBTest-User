@@ -1,10 +1,17 @@
 /****************************************************************************************
  *
  ****************************************************************************************/
-fbt.controller('facebookAppController', ['$scope', '$location', 'fbtAppService', 'facebookAppsFactory', function($scope, $location, fbtAppService, facebookAppsFactory) {
+fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
 
-    // $scope.currentApp = "";
-    $scope.selectedIndex;
+    $scope.currentApp = {};
+
+    //$scope.fbAppID is present due to parent scope
+    facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
+        then(function(result) {
+            $scope.currentApp = result;
+        }, function(result) {
+            //invalid id or no id
+        });
 
     $scope.editFBApp = function() {
         $location.path("/facebookapp/" + $scope.selectedIndex);
@@ -15,7 +22,6 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'fbtAppService',
         if (confirmMsg) {
             facebookAppsFactory.deleteAppByIndex($scope.selectedIndex).
                 then(function(result) {
-                    fbtAppService.resetCurrentApp();
                     $location.path("/");
                 }, function(error) {
                     //todo handle this
@@ -35,16 +41,4 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'fbtAppService',
     $scope.createTestUser = function() {
         $location.path("/testusercreate/").search({ appID: $scope.currentApp.appID });
     }
-
-    //watch for changes to the fbtAppService to know if a new app has been selected
-    $scope.$watch(
-        function() {
-            return fbtAppService.getCurrentApp().app.appID;
-        }, 
-        function(newValue, oldValue) {
-            var selectedApp = fbtAppService.getCurrentApp();
-            $scope.currentApp = selectedApp.app;
-            $scope.selectedIndex = selectedApp.index;
-        }, true);
-
 }]);

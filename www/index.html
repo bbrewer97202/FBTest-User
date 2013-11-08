@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="fbt" ng-csp>
+<html ng-app="fbt">
 <head>
     <title></title>
     <script type="text/javascript" src="js/vendor.js"></script>
@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="css/screen.css">
 </head>
 <body>
-<article class="fbtContent">
+<article class="fbtContent" ng-controller="appController">    
 
     <div class="fbtView">
         <section class="fbtViewContainer fbtViewContainerControls">
-            <div facebook-app-list></div>
+            <div facebook-app-list appid="{{fbAppID}}"></div>
         </section>
         <section class="fbtViewContainer fbtViewContainerContent">
             <div ng-view></div>

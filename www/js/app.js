@@ -46,29 +46,6 @@ var fbtUtilities = (function() {
 })();
 
 
-fbt.factory('fbtAppService', [function() {
-
-    var currentFacebookApp = {};
-    var currentFacebookAppIndex;
-
-    return {
-        getCurrentApp: function() {
-            return {
-                app: currentFacebookApp,
-                index: currentFacebookAppIndex
-            }
-        },
-        setCurrentApp: function(value, index) {
-            currentFacebookApp = value;
-            currentFacebookAppIndex = index;
-        },
-        resetCurrentApp: function() {
-            this.setCurrentApp({});
-        }     
-    }
-
- }]);
-
 fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', function($q, $rootScope, localStorageService) {
 
     var localStorageKey = "localStorageKey";
@@ -119,6 +96,7 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
 
                         for (var i=0; i < resultsLength; i++) {
                             if (result[i].appID === id) {
+                                console.log("winner: " + i + "== ", result[i]);
                                 deferred.resolve(result[i]);
                                 break;
                             }
@@ -232,7 +210,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             var deferred = $q.defer();
             var url = 'https://graph.facebook.com/oauth/access_token?client_id=' + id + '&client_secret=' + secret + '&grant_type=client_credentials';
 
-            console.log(url);
+            // console.log(url);
 
             //todo : mucho error handling
 
@@ -258,7 +236,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + appid + "/accounts/test-users?access_token=" + token;
-                console.log(url);
+                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
@@ -278,7 +256,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             if ((typeof(id) === "string") && (typeof(token) === "string")) {
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + id + "/?access_token=" + token;
-                console.log(url);
+                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
@@ -352,9 +330,18 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
     }
 }]);
 
+fbt.controller('appController', ['$scope', '$location', function($scope, $location) {
+
+    //watch for location changes and assign a scope variable if present
+    $scope.$on('$routeChangeSuccess', function(next, current) { 
+        $scope.fbAppID = $location.search()['appid'];
+    });
+
+}]);
+
 fbt.controller('facebookAppAddNewController', [
-    '$scope', '$location', 'facebookAppsFactory', 'fbtAppService', 'facebookGraphFactory', 
-    function($scope, $location, facebookAppsFactory, fbtAppService, facebookGraphFactory) {
+    '$scope', '$location', 'facebookAppsFactory', 'facebookGraphFactory', 
+    function($scope, $location, facebookAppsFactory, facebookGraphFactory) {
 
     $scope.isEditMode = false;
     $scope.isValidID = true;
@@ -368,8 +355,7 @@ fbt.controller('facebookAppAddNewController', [
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
             then(function(result) {                
-                fbtAppService.setCurrentApp(result.app, result.index);
-                $location.path("/");
+                $location.path("/").search({ appID: result.app.appID });
             }, function(error) {
                 //todo: how to handle
                 alert("save App error: ", error);
@@ -398,10 +384,17 @@ fbt.controller('facebookAppAddNewController', [
 
 }]);
 
-fbt.controller('facebookAppController', ['$scope', '$location', 'fbtAppService', 'facebookAppsFactory', function($scope, $location, fbtAppService, facebookAppsFactory) {
+fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
 
-    // $scope.currentApp = "";
-    $scope.selectedIndex;
+    $scope.currentApp = {};
+
+    //$scope.fbAppID is present due to parent scope
+    facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
+        then(function(result) {
+            $scope.currentApp = result;
+        }, function(result) {
+            //invalid id or no id
+        });
 
     $scope.editFBApp = function() {
         $location.path("/facebookapp/" + $scope.selectedIndex);
@@ -412,7 +405,6 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'fbtAppService',
         if (confirmMsg) {
             facebookAppsFactory.deleteAppByIndex($scope.selectedIndex).
                 then(function(result) {
-                    fbtAppService.resetCurrentApp();
                     $location.path("/");
                 }, function(error) {
                     //todo handle this
@@ -432,23 +424,11 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'fbtAppService',
     $scope.createTestUser = function() {
         $location.path("/testusercreate/").search({ appID: $scope.currentApp.appID });
     }
-
-    //watch for changes to the fbtAppService to know if a new app has been selected
-    $scope.$watch(
-        function() {
-            return fbtAppService.getCurrentApp().app.appID;
-        }, 
-        function(newValue, oldValue) {
-            var selectedApp = fbtAppService.getCurrentApp();
-            $scope.currentApp = selectedApp.app;
-            $scope.selectedIndex = selectedApp.index;
-        }, true);
-
 }]);
 
 fbt.controller('facebookAppEditorController', 
-    ['$scope', '$location', 'fbtAppService', 'facebookGraphFactory', 'facebookAppsFactory', 
-    function($scope, $location, fbtAppService, facebookGraphFactory, facebookAppsFactory) {
+    ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
+    function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
     
     //get the index parameter
     //todo: must be a better way to do this ($routeprovider not be trusted?)
@@ -471,8 +451,7 @@ fbt.controller('facebookAppEditorController',
 
         facebookAppsFactory.updateAppByIndex(id, $scope.appDetails).
             then(function(result) {
-                fbtAppService.setCurrentApp(result.app, result.index);
-                $location.path("/");                
+                $location.path("/").search({ appID: result.app.appID });
             }, function(error) {
                 //todo handle this like the others
                 console.log("error: ", error);
@@ -515,8 +494,8 @@ fbt.controller('facebookAppEditorController',
 }]);
 
 fbt.controller('testUserCreateController', [
-    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'fbtAppService', 'facebookGraphFactory', 
-    function($scope, $location, $routeParams, facebookAppsFactory, fbtAppService, facebookGraphFactory) {
+    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'facebookGraphFactory', 
+    function($scope, $location, $routeParams, facebookAppsFactory, facebookGraphFactory) {
 
         $scope.appDetails = {};
         $scope.testUser = {
@@ -566,15 +545,33 @@ fbt.directive('facebookAppList', function() {
     return {
         restrict: 'A',
         templateUrl: 'facebook-app-list.html',
-        replace: true,
-        scope: {
-            fbApps: '&'
+
+        link: function (scope, element, attrs) {
+
+            //the current appid is passed into directive as attribute
+            scope.$watch(function() {
+                return {
+                    appid: attrs.appid
+                }
+            }, function (newValue, oldValue, scope) {
+
+                var appsLength = scope.fbApps.length;
+                scope.appID = newValue.appid;
+
+                //use passed appid value to highlight current item
+                for (var i=0; i < appsLength; i++) {
+                    if (newValue.appid === scope.fbApps[i].appID) {
+                        scope.selectedIndex = i;
+                        break;
+                    }
+                }
+            }, true);
         },
-        controller: ['$scope', '$location', 'fbtAppService', 'facebookAppsFactory', 
-            function($scope, $location, fbtAppService, facebookAppsFactory) {
+
+        controller: ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
 
             $scope.fbApps = [];
-            $scope.selectedIndex;
+            $scope.selectedIndex;            
 
             $scope.getAppList = function() {                
                 facebookAppsFactory.getAllApps().
@@ -593,28 +590,15 @@ fbt.directive('facebookAppList', function() {
             $scope.selectApp = function(index) {
 
                 $scope.selectedIndex = index;
-                
-                //save to service the data of the current app and the index of the selected item             
-                fbtAppService.setCurrentApp($scope.fbApps[index], index);
-                
 
-                $location.path("/");
+                $location.path("/").search({ 
+                    appid: $scope.fbApps[index].appID 
+                });
             }
 
-            //watch for changes to the fbtAppService to know if a new app has been selected
-            $scope.$watch(
-                function() {
-                    return fbtAppService.getCurrentApp().index;
-                }, 
-                function(newValue, oldValue) {
-                    $scope.selectedIndex = fbtAppService.getCurrentApp().index;                   
-                    $scope.getAppList();
-                }, true);            
+            $scope.getAppList(); 
 
-        }],
-        link: function(scope, element, attrs, ctrl) {
-            scope.getAppList();
-        }
+        }]
     }
 });
 
@@ -643,15 +627,17 @@ fbt.directive('testUserList', function() {
 
             $scope.getTestUserList = function() {
 
-                if ((typeof($scope.currentApp.appID) === "string") && (typeof($scope.currentApp.appToken) === "string")) {
-                    facebookGraphFactory.getTestUsers($scope.currentApp.appID, $scope.currentApp.appToken).
-                        then(function(result) {                        
-                            $scope.testUsers = result.data;
-                            $scope.getTestUserDetails();
-                        }, function(error) {
-                            //todo: handle this 
-                            console.log("getTestUsers: ERROR: " + error);
-                        });
+                if ($scope.currentApp) {
+                    if ((typeof($scope.currentApp.appID) === "string") && (typeof($scope.currentApp.appToken) === "string")) {
+                        facebookGraphFactory.getTestUsers($scope.currentApp.appID, $scope.currentApp.appToken).
+                            then(function(result) {                        
+                                $scope.testUsers = result.data;
+                                $scope.getTestUserDetails();
+                            }, function(error) {
+                                //todo: handle this 
+                                console.log("getTestUsers: ERROR: " + error);
+                            });
+                    }
                 }
             }
 

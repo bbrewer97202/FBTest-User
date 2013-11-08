@@ -13,7 +13,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             var deferred = $q.defer();
             var url = 'https://graph.facebook.com/oauth/access_token?client_id=' + id + '&client_secret=' + secret + '&grant_type=client_credentials';
 
-            console.log(url);
+            // console.log(url);
 
             //todo : mucho error handling
 
@@ -39,7 +39,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + appid + "/accounts/test-users?access_token=" + token;
-                console.log(url);
+                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
@@ -59,7 +59,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             if ((typeof(id) === "string") && (typeof(token) === "string")) {
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + id + "/?access_token=" + token;
-                console.log(url);
+                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
