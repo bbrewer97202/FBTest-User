@@ -1,5 +1,5 @@
 #FB-TestUser
-Browser based console for managing Facebook Test Users.
+Browser based Angular app for managing Facebook Test Users.
 
 ## Getting Started
 Install the node dependencies
