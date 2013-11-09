@@ -8,7 +8,7 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
     //$scope.fbAppID is present due to parent scope
     facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
         then(function(result) {
-            $scope.currentApp = result;
+            $scope.currentApp = result.app
         }, function(result) {
             //invalid id or no id
         });
@@ -20,14 +20,14 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
     $scope.deleteFBApp = function() {
         var confirmMsg = confirm("Do you really want to delete this?");
         if (confirmMsg) {
-            facebookAppsFactory.deleteAppByIndex($scope.selectedIndex).
+            facebookAppsFactory.deleteAppByID($scope.currentApp.appID).
                 then(function(result) {
-                    $location.path("/");
+                    $location.path("/").search({ appid: "" });
                 }, function(error) {
                     //todo handle this
                     //todo remove two different location references
                     alert("delete app by index error");
-                    $location.path("/");
+                    $location.path("/").search({ appid: "" });
                 });
         }
     }
@@ -39,6 +39,6 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
 
 
     $scope.createTestUser = function() {
-        $location.path("/testusercreate/").search({ appID: $scope.currentApp.appID });
+        $location.path("/testusercreate/").search({ appid: $scope.currentApp.appID });
     }
 }]);

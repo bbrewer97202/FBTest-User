@@ -34,7 +34,7 @@ fbt.directive('testUserList', function() {
                                 $scope.getTestUserDetails();
                             }, function(error) {
                                 //todo: handle this 
-                                console.log("getTestUsers: ERROR: " + error);
+                                // console.log("getTestUsers: ERROR: " + error);
                             });
                     }
                 }

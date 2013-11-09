@@ -53,8 +53,10 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
 
                         for (var i=0; i < resultsLength; i++) {
                             if (result[i].appID === id) {
-                                console.log("winner: " + i + "== ", result[i]);
-                                deferred.resolve(result[i]);
+                                deferred.resolve({
+                                    app: result[i],
+                                    index: i
+                                });
                                 break;
                             }
                         }
@@ -86,25 +88,43 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
             return deferred.promise;
         },
 
-        deleteAppByIndex: function(index) {
+        deleteAppByID: function(id) {
 
             var deferred = $q.defer();
-            this.getAllApps().
-                then(function(result) {
-                    if ((result.length > 0) && (typeof(result[index]) === "object")) {
-                        result.splice(index, 1);
-                        if (writeData(result)) {
-                            deferred.resolve(index);
-                        } else {
-                            deferred.reject("");
-                        }
-                    } else {
-                        deferred.reject("");
-                    }
-                }, function(error) {
-                    deferred.reject(error);
-                });
+            var service = this;
 
+            this.getAppByFacebookID(id).
+                then(
+                    function(result) {
+                        
+                        var index = result.index;
+
+                        service.getAllApps().then(
+                            function(result) {
+                                if ((result.length > 0) && (typeof(result[index]) === "object")) {
+                                    result.splice(index, 1);
+                                    if (writeData(result)) {
+                                        deferred.resolve(index);
+                                    } else {
+                                        //todo
+                                        deferred.reject("");
+                                    }                                    
+                                } else {
+                                    //todo
+                                    deferred.reject("");
+                                }
+                            },
+                            function(result) {
+                                //todo: error getting all apps
+                            }
+                        );     
+
+                    },
+                    function(result) {
+                        //todo
+                        deferred.reject("could not delete app by id: " + result);
+                    }
+                );
             return deferred.promise;
         },
 

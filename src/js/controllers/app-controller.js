@@ -1,10 +1,11 @@
 /****************************************************************************************
  * primary app controller
  ****************************************************************************************/
-fbt.controller('appController', ['$scope', '$location', function($scope, $location) {
+fbt.controller('appController', ['$scope', '$rootScope', '$location', function($scope, $rootScope, $location) {
 
     //watch for location changes and assign a scope variable if present
-    $scope.$on('$routeChangeSuccess', function(next, current) { 
+    $rootScope.$on('$locationChangeSuccess', function(event, newLocation, currentLocation) {         
+
         $scope.fbAppID = $location.search()['appid'];
     });
 

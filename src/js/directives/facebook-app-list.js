@@ -1,5 +1,5 @@
 /****************************************************************************************
- * //todo: remove location/routing
+ * display a list of facebook apps as received from facebookAppsFactory service
  ****************************************************************************************/
 fbt.directive('facebookAppList', function() {
     return {
@@ -15,16 +15,15 @@ fbt.directive('facebookAppList', function() {
                 }
             }, function (newValue, oldValue, scope) {
 
-                var appsLength = scope.fbApps.length;
-                scope.appID = newValue.appid;
-
-                //use passed appid value to highlight current item
-                for (var i=0; i < appsLength; i++) {
-                    if (newValue.appid === scope.fbApps[i].appID) {
-                        scope.selectedIndex = i;
-                        break;
-                    }
+                if ((typeof(newValue.appid) === "string") && (newValue.appid.length > 0)) {
+                    scope.appID = newValue.appid;                  
+                } else {
+                    delete scope.selectedIndex;
+                    delete scope.appID;                    
                 }
+
+                scope.getAppList();
+
             }, true);
         },
 
@@ -37,6 +36,7 @@ fbt.directive('facebookAppList', function() {
                 facebookAppsFactory.getAllApps().
                     then(function(result) {                        
                         $scope.fbApps = result;
+                        $scope.selectedIndexUpdate();
                     }, function(error) {
                         //todo: handle this 
                         console.log("getAllApps: ERROR: " + error);
@@ -44,7 +44,19 @@ fbt.directive('facebookAppList', function() {
             }
 
             $scope.addNewFBApp = function() {
-                $location.path("/facebookapp");
+                $location.path("/facebookapp").search({ app: "" });
+            }
+
+            $scope.selectedIndexUpdate = function() {
+
+                var appsLength = $scope.fbApps.length;
+
+                for (var i=0; i < appsLength; i++) {
+                    if ($scope.appID === $scope.fbApps[i].appID) {
+                        $scope.selectedIndex = i;
+                        break;
+                    }
+                }  
             }
 
             $scope.selectApp = function(index) {

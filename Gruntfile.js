@@ -43,13 +43,6 @@ module.exports = function(grunt) {
           '<%= config.dev.css %>': ['<%= config.src.css %>']
         }
       }
-      // minify: {
-      //   cwd: '<%= config.src.css %>',
-      //   expand: true,
-      //   src: ['*.css'],
-      //   dest: '<%= config.dev.css %>',
-      //   ext: '.css'
-      // }
     },
 
     ngtemplates: {

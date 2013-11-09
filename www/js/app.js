@@ -96,8 +96,10 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
 
                         for (var i=0; i < resultsLength; i++) {
                             if (result[i].appID === id) {
-                                console.log("winner: " + i + "== ", result[i]);
-                                deferred.resolve(result[i]);
+                                deferred.resolve({
+                                    app: result[i],
+                                    index: i
+                                });
                                 break;
                             }
                         }
@@ -129,25 +131,43 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
             return deferred.promise;
         },
 
-        deleteAppByIndex: function(index) {
+        deleteAppByID: function(id) {
 
             var deferred = $q.defer();
-            this.getAllApps().
-                then(function(result) {
-                    if ((result.length > 0) && (typeof(result[index]) === "object")) {
-                        result.splice(index, 1);
-                        if (writeData(result)) {
-                            deferred.resolve(index);
-                        } else {
-                            deferred.reject("");
-                        }
-                    } else {
-                        deferred.reject("");
-                    }
-                }, function(error) {
-                    deferred.reject(error);
-                });
+            var service = this;
 
+            this.getAppByFacebookID(id).
+                then(
+                    function(result) {
+                        
+                        var index = result.index;
+
+                        service.getAllApps().then(
+                            function(result) {
+                                if ((result.length > 0) && (typeof(result[index]) === "object")) {
+                                    result.splice(index, 1);
+                                    if (writeData(result)) {
+                                        deferred.resolve(index);
+                                    } else {
+                                        //todo
+                                        deferred.reject("");
+                                    }                                    
+                                } else {
+                                    //todo
+                                    deferred.reject("");
+                                }
+                            },
+                            function(result) {
+                                //todo: error getting all apps
+                            }
+                        );     
+
+                    },
+                    function(result) {
+                        //todo
+                        deferred.reject("could not delete app by id: " + result);
+                    }
+                );
             return deferred.promise;
         },
 
@@ -330,10 +350,11 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
     }
 }]);
 
-fbt.controller('appController', ['$scope', '$location', function($scope, $location) {
+fbt.controller('appController', ['$scope', '$rootScope', '$location', function($scope, $rootScope, $location) {
 
     //watch for location changes and assign a scope variable if present
-    $scope.$on('$routeChangeSuccess', function(next, current) { 
+    $rootScope.$on('$locationChangeSuccess', function(event, newLocation, currentLocation) {         
+
         $scope.fbAppID = $location.search()['appid'];
     });
 
@@ -348,14 +369,14 @@ fbt.controller('facebookAppAddNewController', [
     $scope.appDetails = {};
 
     $scope.cancel = function() {
-        $location.path("/");
+        $location.path("/").search({ appid: "" });
     }
 
     $scope.submit = function(updates) {        
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
             then(function(result) {                
-                $location.path("/").search({ appID: result.app.appID });
+                $location.path("/").search({ appid: result.app.appID });
             }, function(error) {
                 //todo: how to handle
                 alert("save App error: ", error);
@@ -391,7 +412,7 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
     //$scope.fbAppID is present due to parent scope
     facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
         then(function(result) {
-            $scope.currentApp = result;
+            $scope.currentApp = result.app
         }, function(result) {
             //invalid id or no id
         });
@@ -403,14 +424,14 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
     $scope.deleteFBApp = function() {
         var confirmMsg = confirm("Do you really want to delete this?");
         if (confirmMsg) {
-            facebookAppsFactory.deleteAppByIndex($scope.selectedIndex).
+            facebookAppsFactory.deleteAppByID($scope.currentApp.appID).
                 then(function(result) {
-                    $location.path("/");
+                    $location.path("/").search({ appid: "" });
                 }, function(error) {
                     //todo handle this
                     //todo remove two different location references
                     alert("delete app by index error");
-                    $location.path("/");
+                    $location.path("/").search({ appid: "" });
                 });
         }
     }
@@ -422,7 +443,7 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
 
 
     $scope.createTestUser = function() {
-        $location.path("/testusercreate/").search({ appID: $scope.currentApp.appID });
+        $location.path("/testusercreate/").search({ appid: $scope.currentApp.appID });
     }
 }]);
 
@@ -431,9 +452,10 @@ fbt.controller('facebookAppEditorController',
     function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
     
     //get the index parameter
-    //todo: must be a better way to do this ($routeprovider not be trusted?)
+    //todo: must be a better way to do this ($routeprovider not to be trusted?)
     var path = $location.path();
     var id = path.split("/")[2];
+
 
     //do we have a valid id?
     $scope.isValidID = ((parseInt(id) >= 0) && (parseInt(id) < 10000)) ? true : false;
@@ -451,7 +473,7 @@ fbt.controller('facebookAppEditorController',
 
         facebookAppsFactory.updateAppByIndex(id, $scope.appDetails).
             then(function(result) {
-                $location.path("/").search({ appID: result.app.appID });
+                $location.path("/").search({ appid: result.app.appID });
             }, function(error) {
                 //todo handle this like the others
                 console.log("error: ", error);
@@ -466,7 +488,6 @@ fbt.controller('facebookAppEditorController',
 
         facebookGraphFactory.getAppAccessToken(id, secret).
             then(function(result) {
-                console.log("got result: '" + result + "'");
                 $scope.appUpdates.appToken = result;
             }, function(error) {
                 //todo: something better than this
@@ -484,6 +505,7 @@ fbt.controller('facebookAppEditorController',
             then(function(result) {
                 $scope.appDetails = result;
             }, function(error) {
+                //todo
                 console.log("get error");
             }).
             finally(function() {
@@ -508,7 +530,7 @@ fbt.controller('testUserCreateController', [
         if (typeof($routeParams.appID) === "string") {
             facebookAppsFactory.getAppByFacebookID($routeParams.appID).
                 then(function(result) {
-                    $scope.appDetails = result
+                    $scope.appDetails = result.app;
                 }, function(result) {
                     //todo: handle
                     console.log("error: ", result);
@@ -555,16 +577,15 @@ fbt.directive('facebookAppList', function() {
                 }
             }, function (newValue, oldValue, scope) {
 
-                var appsLength = scope.fbApps.length;
-                scope.appID = newValue.appid;
-
-                //use passed appid value to highlight current item
-                for (var i=0; i < appsLength; i++) {
-                    if (newValue.appid === scope.fbApps[i].appID) {
-                        scope.selectedIndex = i;
-                        break;
-                    }
+                if ((typeof(newValue.appid) === "string") && (newValue.appid.length > 0)) {
+                    scope.appID = newValue.appid;                  
+                } else {
+                    delete scope.selectedIndex;
+                    delete scope.appID;                    
                 }
+
+                scope.getAppList();
+
             }, true);
         },
 
@@ -577,6 +598,7 @@ fbt.directive('facebookAppList', function() {
                 facebookAppsFactory.getAllApps().
                     then(function(result) {                        
                         $scope.fbApps = result;
+                        $scope.selectedIndexUpdate();
                     }, function(error) {
                         //todo: handle this 
                         console.log("getAllApps: ERROR: " + error);
@@ -584,7 +606,19 @@ fbt.directive('facebookAppList', function() {
             }
 
             $scope.addNewFBApp = function() {
-                $location.path("/facebookapp");
+                $location.path("/facebookapp").search({ app: "" });
+            }
+
+            $scope.selectedIndexUpdate = function() {
+
+                var appsLength = $scope.fbApps.length;
+
+                for (var i=0; i < appsLength; i++) {
+                    if ($scope.appID === $scope.fbApps[i].appID) {
+                        $scope.selectedIndex = i;
+                        break;
+                    }
+                }  
             }
 
             $scope.selectApp = function(index) {
@@ -635,7 +669,7 @@ fbt.directive('testUserList', function() {
                                 $scope.getTestUserDetails();
                             }, function(error) {
                                 //todo: handle this 
-                                console.log("getTestUsers: ERROR: " + error);
+                                // console.log("getTestUsers: ERROR: " + error);
                             });
                     }
                 }

@@ -1,5 +1,5 @@
 /****************************************************************************************
- *
+ * controller for facebook add new app view
  ****************************************************************************************/
 fbt.controller('facebookAppAddNewController', [
     '$scope', '$location', 'facebookAppsFactory', 'facebookGraphFactory', 
@@ -10,14 +10,14 @@ fbt.controller('facebookAppAddNewController', [
     $scope.appDetails = {};
 
     $scope.cancel = function() {
-        $location.path("/");
+        $location.path("/").search({ appid: "" });
     }
 
     $scope.submit = function(updates) {        
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
             then(function(result) {                
-                $location.path("/").search({ appID: result.app.appID });
+                $location.path("/").search({ appid: result.app.appID });
             }, function(error) {
                 //todo: how to handle
                 alert("save App error: ", error);

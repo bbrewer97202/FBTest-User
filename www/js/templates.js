@@ -11,7 +11,7 @@ angular.module('fbt').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('facebook-app.html',
-    "<div>{{fbAppID}}</div><div ng-show=\"currentApp.appID\"><div class=\"fbtComponent fbtFBAppHeader\"><h2>{{currentApp.appName}}</h2><h6>ID: {{currentApp.appID}}</h6><button class=\"fbtCTAButton\" ng-click=\"editFBApp()\">Edit</button> <button class=\"fbtCTAButton\" ng-click=\"deleteFBApp()\">Remove</button> <button class=\"fbtCTAButton\" ng-click=\"visitFBApp()\">View on Facebook</button></div><div test-user-list=\"\" app-token=\"{{currentApp.appToken}}\" app-id=\"{{currentApp.appID}}\"></div><button ng-click=\"createTestUser()\">Create New Test User</button></div>"
+    "<div ng-show=\"currentApp.appID\"><div class=\"fbtComponent fbtFBAppHeader\"><h2>{{currentApp.appName}}</h2><h6>ID: {{currentApp.appID}}</h6><button class=\"fbtCTAButton\" ng-click=\"editFBApp()\">Edit</button> <button class=\"fbtCTAButton\" ng-click=\"deleteFBApp()\">Remove</button> <button class=\"fbtCTAButton\" ng-click=\"visitFBApp()\">View on Facebook</button></div><div test-user-list=\"\" app-token=\"{{currentApp.appToken}}\" app-id=\"{{currentApp.appID}}\"></div><button ng-click=\"createTestUser()\">Create New Test User</button></div>"
   );
 
 
@@ -21,7 +21,7 @@ angular.module('fbt').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('test-user-list.html',
-    "<div>{{fbAppID}}</div><div class=\"fbtComponent\"><h3>Test Users</h3><div ng-repeat=\"testUser in testUsers\" class=\"testUserListing\"><h5>{{testUser.user.name}} ({{testUser.id}})</h5><button ng-click=\"openProfilePage('https://www.facebook.com/profile.php?id=' + testUser.user.id)\">Profile Page</button> <button ng-click=\"loginAsUser(testUser.login_url)\">Login as {{testUser.user.first_name}}</button> <button ng-click=\"deleteTestUser(testUser.id, currentApp.appToken)\">Delete</button></div><div class=\"fbtNotice\" ng-show=\"testUsers.length < 1\">No test users.</div></div>"
+    "<div class=\"fbtComponent\"><h3>Test Users</h3><div ng-repeat=\"testUser in testUsers\" class=\"testUserListing\"><h5>{{testUser.user.name}} ({{testUser.id}})</h5><button ng-click=\"openProfilePage('https://www.facebook.com/profile.php?id=' + testUser.user.id)\">Profile Page</button> <button ng-click=\"loginAsUser(testUser.login_url)\">Login as {{testUser.user.first_name}}</button> <button ng-click=\"deleteTestUser(testUser.id, currentApp.appToken)\">Delete</button></div><div class=\"fbtNotice\" ng-show=\"testUsers.length < 1\">No test users.</div></div>"
   );
 
 }]);

@@ -1,14 +1,15 @@
 /****************************************************************************************
- * //todo: how much code between edit version and new version of form can be shared
+ * controller for facebook add edit app view
  ****************************************************************************************/
 fbt.controller('facebookAppEditorController', 
     ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
     function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
     
     //get the index parameter
-    //todo: must be a better way to do this ($routeprovider not be trusted?)
+    //todo: must be a better way to do this ($routeprovider not to be trusted?)
     var path = $location.path();
     var id = path.split("/")[2];
+
 
     //do we have a valid id?
     $scope.isValidID = ((parseInt(id) >= 0) && (parseInt(id) < 10000)) ? true : false;
@@ -26,7 +27,7 @@ fbt.controller('facebookAppEditorController',
 
         facebookAppsFactory.updateAppByIndex(id, $scope.appDetails).
             then(function(result) {
-                $location.path("/").search({ appID: result.app.appID });
+                $location.path("/").search({ appid: result.app.appID });
             }, function(error) {
                 //todo handle this like the others
                 console.log("error: ", error);
@@ -41,7 +42,6 @@ fbt.controller('facebookAppEditorController',
 
         facebookGraphFactory.getAppAccessToken(id, secret).
             then(function(result) {
-                console.log("got result: '" + result + "'");
                 $scope.appUpdates.appToken = result;
             }, function(error) {
                 //todo: something better than this
@@ -59,6 +59,7 @@ fbt.controller('facebookAppEditorController',
             then(function(result) {
                 $scope.appDetails = result;
             }, function(error) {
+                //todo
                 console.log("get error");
             }).
             finally(function() {

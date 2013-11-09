@@ -16,7 +16,7 @@ fbt.controller('testUserCreateController', [
         if (typeof($routeParams.appID) === "string") {
             facebookAppsFactory.getAppByFacebookID($routeParams.appID).
                 then(function(result) {
-                    $scope.appDetails = result
+                    $scope.appDetails = result.app;
                 }, function(result) {
                     //todo: handle
                     console.log("error: ", result);
