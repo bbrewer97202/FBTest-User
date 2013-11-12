@@ -2,7 +2,7 @@
 <h2 ng-show="isEditMode">Edit Facebook app</h2>
 <h2 ng-show="! isEditMode">Add Facebook app</h2>
 <div class="fbtComponent">    
-    <form name="facebookAppEditorForm" novalidate ng-show="isValidID">
+    <form name="facebookAppEditorForm" novalidate ng-hide="isEditMode && (! fbAppID)">
         <div class="formRow">
             <label>Name:</label>
             <input type="text" name="appName" ng-model="appUpdates.appName" required class="input-large">
@@ -29,5 +29,5 @@
             <button ng-click="cancel()">Cancel</button>
         </div>
     </form>
-    <span class="error" ng-show="!isValidID">Invalid ID.</span>
+    <span class="error" ng-show="(! fbAppID) && (isEditMode)">Invalid ID.</span>
 </div>

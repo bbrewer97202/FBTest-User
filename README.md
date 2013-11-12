@@ -26,4 +26,4 @@ Click on "Add New App" and enter the requested information about your Facebook a
 
 
 ###Notes
-At some point this will be turned into a Chrome extension.  
+This project was formerly a Chrome Extension but currently does not run in that environment.

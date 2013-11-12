@@ -6,7 +6,6 @@ fbt.controller('facebookAppAddNewController', [
     function($scope, $location, facebookAppsFactory, facebookGraphFactory) {
 
     $scope.isEditMode = false;
-    $scope.isValidID = true;
     $scope.appDetails = {};
 
     $scope.cancel = function() {
@@ -17,7 +16,7 @@ fbt.controller('facebookAppAddNewController', [
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
             then(function(result) {                
-                $location.path("/").search({ appid: result.app.appID });
+                $location.path("/").search({ appid: result.appID });
             }, function(error) {
                 //todo: how to handle
                 alert("save App error: ", error);
@@ -28,7 +27,6 @@ fbt.controller('facebookAppAddNewController', [
 
         facebookGraphFactory.getAppAccessToken(id, secret).
             then(function(result) {
-                console.log("got result: '" + result + "'");
                 $scope.appUpdates.appToken = result;
             }, function(error) {
                 //todo: something better than this

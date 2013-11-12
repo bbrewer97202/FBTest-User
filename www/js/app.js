@@ -1,21 +1,19 @@
-/*! fbt - v0.0.6 - 2013-11-08 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
+/*! fbt - v0.0.6 - 2013-11-11 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
 
 fbt.config(['$routeProvider', function($routeProvider) {
 
     //local storage service prefix
     //angular.module('LocalStorageModule').value('prefix', 'fbt');
 
-    //comment
-
     //routing
     $routeProvider.
-        when('/facebookapp/:id', {
-            templateUrl: 'facebook-app-form.html',
-            controller: 'facebookAppEditorController'
-        }).
-        when('/facebookapp', {
+        when('/app/new', {
             templateUrl: 'facebook-app-form.html',
             controller: 'facebookAppAddNewController'
+        }).
+        when('/app/edit', {
+            templateUrl: 'facebook-app-form.html',
+            controller: 'facebookAppEditorController'
         }).  
         when('/testusercreate', {
             templateUrl: 'test-user-create.html',
@@ -25,11 +23,6 @@ fbt.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'facebook-app.html',
             controller: 'facebookAppController'
         });   
-
-    // //events
-    // $rootScope.$on('deleteFacebookApp', function(e) {
-    //     alert("deleted app event");
-    // });
 
 }]);
 
@@ -51,18 +44,18 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
     var localStorageKey = "localStorageKey";
 
     //shared utility method for wrting passed data to destination
-    //@returns boolean success
-    var writeData = function(data) {
+    var writeAppData = function(data) {
 
-        var success = false;
+        var deferred = $q.defer();
 
-        if (localStorageService.remove('localStorageKey')) {
-            if (localStorageService.add(localStorageKey, JSON.stringify(data))) {
-                success = true;
-            }
-        } 
+        if ((localStorageService.remove('localStorageKey')) && (localStorageService.add(localStorageKey, JSON.stringify(data)))) {
+            deferred.resolve(data);
+        } else {
+            deferred.reject("Could not write data");
+        }
 
-        return success;
+        return deferred.promise;
+
     };
 
     //public methods
@@ -114,102 +107,89 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
             return deferred.promise;
         },
 
-        getAppByIndex: function(index) {
-
-            var deferred = $q.defer();
-            this.getAllApps().
-                then(function(result) {
-                    if ((result.length > 0) && (typeof(result[index]) === "object")) {
-                        deferred.resolve(result[index]);
-                    } else {
-                        deferred.reject("");
-                    }
-                }, function(error) {
-                    deferred.reject(error);
-                });
-
-            return deferred.promise;
-        },
-
-        deleteAppByID: function(id) {
-
-            var deferred = $q.defer();
-            var service = this;
-
-            this.getAppByFacebookID(id).
-                then(
-                    function(result) {
-                        
-                        var index = result.index;
-
-                        service.getAllApps().then(
-                            function(result) {
-                                if ((result.length > 0) && (typeof(result[index]) === "object")) {
-                                    result.splice(index, 1);
-                                    if (writeData(result)) {
-                                        deferred.resolve(index);
-                                    } else {
-                                        //todo
-                                        deferred.reject("");
-                                    }                                    
-                                } else {
-                                    //todo
-                                    deferred.reject("");
-                                }
-                            },
-                            function(result) {
-                                //todo: error getting all apps
-                            }
-                        );     
-
-                    },
-                    function(result) {
-                        //todo
-                        deferred.reject("could not delete app by id: " + result);
-                    }
-                );
-            return deferred.promise;
-        },
-
+        /**
+         * add the passed app object as a new Facebook app 
+         * @param appDetails is an app object with FB app details
+         *
+         */
         saveApp: function(appDetails) {
 
             var deferred = $q.defer();
             this.getAllApps().
-                then(function(result) {
-                    result.push(appDetails);
-
-                    if (writeData(result)) {
-                        deferred.resolve({
-                            app: appDetails,
-                            index: (result.length-1)
-                        });
-                    } else {
-                        deferred.reject("");
-                    }
+                then(function(allApps) {
+                    allApps.push(appDetails);
+                    return writeAppData(allApps);
+                }).
+                then(function(appList) {
+                    deferred.resolve(appDetails);
                 }, function(error) {
-                    deferred.reject(error);
+                    deferred.reject("Could not save new app: " + error);
                 });
 
             return deferred.promise;
         },
 
-        updateAppByIndex: function(index, appDetails) {
+        /**
+         * delete an app based on the passed Facebook ID
+         * @param id is the FB app ID of the app to delete
+         *
+         */
+        deleteAppByID: function(id) {
 
+            var index;
             var deferred = $q.defer();
-            this.getAllApps().
-                then(function(result) {
-                    result[index] = appDetails;
+            var service = this;
 
-                    if (writeData(result)) {
-                        deferred.resolve({
-                            app: appDetails,
-                            index: index
-                        });
+            this.getAppByFacebookID(id).
+                then(function(result) {
+                    index = result.index;
+                    return service.getAllApps();
+                }).
+                then(function(allApps) {
+                    if ((allApps.length > 0) && (typeof(allApps[index]) === "object")) {
+                        allApps.splice(index, 1);
+                        return writeAppData(allApps);
                     } else {
-                        deferred.reject("");
+                        deferred.reject("Could not delete app by id: invalid index");
                     }
+                }).
+                then(function(success) {
+                    deferred.resolve(success);
                 }, function(error) {
-                    deferred.reject(error);
+                    deferred.reject("Could not delete app by id: " + error);
+                });
+
+            return deferred.promise;
+        },
+
+        /**
+         * update an existing app with new details/
+         * @param existingAppID is the key of the app to update
+         * @param appDetails is an app object with FB app details
+         *
+         */
+        updateApp: function(existingAppID, appDetails) {
+
+            var index;
+            var service = this;
+            var deferred = $q.defer();
+
+            this.getAppByFacebookID(existingAppID).
+                then(function(results) {
+                    index = results.index;
+                    return service.getAllApps();
+                }).
+                then(function(allApps) {
+                    allApps[index] = appDetails;
+                    return allApps;
+                }).
+                then(function(updatedApps) {
+                    return writeAppData(updatedApps);
+                }).
+                then(function(success) {
+                    deferred.resolve(appDetails);
+                }, function(error) {
+                    deferred.reject("Could not update saved app: " + error);
                 });
 
             return deferred.promise;
@@ -365,7 +345,6 @@ fbt.controller('facebookAppAddNewController', [
     function($scope, $location, facebookAppsFactory, facebookGraphFactory) {
 
     $scope.isEditMode = false;
-    $scope.isValidID = true;
     $scope.appDetails = {};
 
     $scope.cancel = function() {
@@ -376,7 +355,7 @@ fbt.controller('facebookAppAddNewController', [
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
             then(function(result) {                
-                $location.path("/").search({ appid: result.app.appID });
+                $location.path("/").search({ appid: result.appID });
             }, function(error) {
                 //todo: how to handle
                 alert("save App error: ", error);
@@ -387,7 +366,6 @@ fbt.controller('facebookAppAddNewController', [
 
         facebookGraphFactory.getAppAccessToken(id, secret).
             then(function(result) {
-                console.log("got result: '" + result + "'");
                 $scope.appUpdates.appToken = result;
             }, function(error) {
                 //todo: something better than this
@@ -418,7 +396,7 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
         });
 
     $scope.editFBApp = function() {
-        $location.path("/facebookapp/" + $scope.selectedIndex);
+        $location.path("/app/edit").search({ appid: $scope.currentApp.appID });
     }
 
     $scope.deleteFBApp = function() {
@@ -451,29 +429,30 @@ fbt.controller('facebookAppEditorController',
     ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
     function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
     
-    //get the index parameter
-    //todo: must be a better way to do this ($routeprovider not to be trusted?)
-    var path = $location.path();
-    var id = path.split("/")[2];
-
-
-    //do we have a valid id?
-    $scope.isValidID = ((parseInt(id) >= 0) && (parseInt(id) < 10000)) ? true : false;
-
     $scope.isEditMode = true;
     $scope.appDetails = {};
 
+    //$scope.fbAppID is present due to parent scope
+    facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
+        then(function(result) {
+            $scope.appDetails = result.app;
+            $scope.reset();
+        }, function(result) {
+            //todo
+            //invalid id or no id
+        });
+
     $scope.cancel = function() {
-        $location.path("/");
+        $location.path("/").search({ appid: $scope.fbAppID });
     }
 
     $scope.submit = function(updates) {        
 
         $scope.appDetails = angular.copy(updates); 
 
-        facebookAppsFactory.updateAppByIndex(id, $scope.appDetails).
+        facebookAppsFactory.updateApp($scope.fbAppID, $scope.appDetails).
             then(function(result) {
-                $location.path("/").search({ appid: result.app.appID });
+                $location.path("/").search({ appid: result.appID });
             }, function(error) {
                 //todo handle this like the others
                 console.log("error: ", error);
@@ -499,19 +478,19 @@ fbt.controller('facebookAppEditorController',
         return angular.equals(updates, $scope.appDetails);
     }
 
-    if ($scope.isValidID) {
+    // if ($scope.isValidID) {
 
-        facebookAppsFactory.getAppByIndex(id).
-            then(function(result) {
-                $scope.appDetails = result;
-            }, function(error) {
-                //todo
-                console.log("get error");
-            }).
-            finally(function() {
-                $scope.reset();
-            });            
-    }
+    //     facebookAppsFactory.getAppByFacebookID(id).
+    //         then(function(result) {
+    //             $scope.appDetails = result;
+    //         }, function(error) {
+    //             //todo
+    //             console.log("get error");
+    //         }).
+    //         finally(function() {
+    //             $scope.reset();
+    //         });            
+    // }
 
 }]);
 
@@ -606,7 +585,7 @@ fbt.directive('facebookAppList', function() {
             }
 
             $scope.addNewFBApp = function() {
-                $location.path("/facebookapp").search({ app: "" });
+                $location.path("/app/new").search({ app: "" });
             }
 
             $scope.selectedIndexUpdate = function() {
@@ -628,6 +607,10 @@ fbt.directive('facebookAppList', function() {
                 $location.path("/").search({ 
                     appid: $scope.fbApps[index].appID 
                 });
+            }
+
+            $scope.refreshHomeState = function() {
+                $location.path("/").search({ appid: "" });
             }
 
             $scope.getAppList(); 

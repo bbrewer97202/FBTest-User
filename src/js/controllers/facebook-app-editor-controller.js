@@ -5,29 +5,30 @@ fbt.controller('facebookAppEditorController',
     ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
     function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
     
-    //get the index parameter
-    //todo: must be a better way to do this ($routeprovider not to be trusted?)
-    var path = $location.path();
-    var id = path.split("/")[2];
-
-
-    //do we have a valid id?
-    $scope.isValidID = ((parseInt(id) >= 0) && (parseInt(id) < 10000)) ? true : false;
-
     $scope.isEditMode = true;
     $scope.appDetails = {};
 
+    //$scope.fbAppID is present due to parent scope
+    facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
+        then(function(result) {
+            $scope.appDetails = result.app;
+            $scope.reset();
+        }, function(result) {
+            //todo
+            //invalid id or no id
+        });
+
     $scope.cancel = function() {
-        $location.path("/");
+        $location.path("/").search({ appid: $scope.fbAppID });
     }
 
     $scope.submit = function(updates) {        
 
         $scope.appDetails = angular.copy(updates); 
 
-        facebookAppsFactory.updateAppByIndex(id, $scope.appDetails).
+        facebookAppsFactory.updateApp($scope.fbAppID, $scope.appDetails).
             then(function(result) {
-                $location.path("/").search({ appid: result.app.appID });
+                $location.path("/").search({ appid: result.appID });
             }, function(error) {
                 //todo handle this like the others
                 console.log("error: ", error);
@@ -53,18 +54,18 @@ fbt.controller('facebookAppEditorController',
         return angular.equals(updates, $scope.appDetails);
     }
 
-    if ($scope.isValidID) {
+    // if ($scope.isValidID) {
 
-        facebookAppsFactory.getAppByIndex(id).
-            then(function(result) {
-                $scope.appDetails = result;
-            }, function(error) {
-                //todo
-                console.log("get error");
-            }).
-            finally(function() {
-                $scope.reset();
-            });            
-    }
+    //     facebookAppsFactory.getAppByFacebookID(id).
+    //         then(function(result) {
+    //             $scope.appDetails = result;
+    //         }, function(error) {
+    //             //todo
+    //             console.log("get error");
+    //         }).
+    //         finally(function() {
+    //             $scope.reset();
+    //         });            
+    // }
 
 }]);

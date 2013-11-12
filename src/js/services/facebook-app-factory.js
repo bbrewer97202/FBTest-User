@@ -8,18 +8,18 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
     var localStorageKey = "localStorageKey";
 
     //shared utility method for wrting passed data to destination
-    //@returns boolean success
-    var writeData = function(data) {
+    var writeAppData = function(data) {
 
-        var success = false;
+        var deferred = $q.defer();
 
-        if (localStorageService.remove('localStorageKey')) {
-            if (localStorageService.add(localStorageKey, JSON.stringify(data))) {
-                success = true;
-            }
-        } 
+        if ((localStorageService.remove('localStorageKey')) && (localStorageService.add(localStorageKey, JSON.stringify(data)))) {
+            deferred.resolve(data);
+        } else {
+            deferred.reject("Could not write data");
+        }
 
-        return success;
+        return deferred.promise;
+
     };
 
     //public methods
@@ -71,102 +71,89 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
             return deferred.promise;
         },
 
-        getAppByIndex: function(index) {
-
-            var deferred = $q.defer();
-            this.getAllApps().
-                then(function(result) {
-                    if ((result.length > 0) && (typeof(result[index]) === "object")) {
-                        deferred.resolve(result[index]);
-                    } else {
-                        deferred.reject("");
-                    }
-                }, function(error) {
-                    deferred.reject(error);
-                });
-
-            return deferred.promise;
-        },
-
-        deleteAppByID: function(id) {
-
-            var deferred = $q.defer();
-            var service = this;
-
-            this.getAppByFacebookID(id).
-                then(
-                    function(result) {
-                        
-                        var index = result.index;
-
-                        service.getAllApps().then(
-                            function(result) {
-                                if ((result.length > 0) && (typeof(result[index]) === "object")) {
-                                    result.splice(index, 1);
-                                    if (writeData(result)) {
-                                        deferred.resolve(index);
-                                    } else {
-                                        //todo
-                                        deferred.reject("");
-                                    }                                    
-                                } else {
-                                    //todo
-                                    deferred.reject("");
-                                }
-                            },
-                            function(result) {
-                                //todo: error getting all apps
-                            }
-                        );     
-
-                    },
-                    function(result) {
-                        //todo
-                        deferred.reject("could not delete app by id: " + result);
-                    }
-                );
-            return deferred.promise;
-        },
-
+        /**
+         * add the passed app object as a new Facebook app 
+         * @param appDetails is an app object with FB app details
+         *
+         */
         saveApp: function(appDetails) {
 
             var deferred = $q.defer();
             this.getAllApps().
-                then(function(result) {
-                    result.push(appDetails);
-
-                    if (writeData(result)) {
-                        deferred.resolve({
-                            app: appDetails,
-                            index: (result.length-1)
-                        });
-                    } else {
-                        deferred.reject("");
-                    }
+                then(function(allApps) {
+                    allApps.push(appDetails);
+                    return writeAppData(allApps);
+                }).
+                then(function(appList) {
+                    deferred.resolve(appDetails);
                 }, function(error) {
-                    deferred.reject(error);
+                    deferred.reject("Could not save new app: " + error);
                 });
 
             return deferred.promise;
         },
 
-        updateAppByIndex: function(index, appDetails) {
+        /**
+         * delete an app based on the passed Facebook ID
+         * @param id is the FB app ID of the app to delete
+         *
+         */
+        deleteAppByID: function(id) {
 
+            var index;
             var deferred = $q.defer();
-            this.getAllApps().
-                then(function(result) {
-                    result[index] = appDetails;
+            var service = this;
 
-                    if (writeData(result)) {
-                        deferred.resolve({
-                            app: appDetails,
-                            index: index
-                        });
+            this.getAppByFacebookID(id).
+                then(function(result) {
+                    index = result.index;
+                    return service.getAllApps();
+                }).
+                then(function(allApps) {
+                    if ((allApps.length > 0) && (typeof(allApps[index]) === "object")) {
+                        allApps.splice(index, 1);
+                        return writeAppData(allApps);
                     } else {
-                        deferred.reject("");
+                        deferred.reject("Could not delete app by id: invalid index");
                     }
+                }).
+                then(function(success) {
+                    deferred.resolve(success);
                 }, function(error) {
-                    deferred.reject(error);
+                    deferred.reject("Could not delete app by id: " + error);
+                });
+
+            return deferred.promise;
+        },
+
+        /**
+         * update an existing app with new details/
+         * @param existingAppID is the key of the app to update
+         * @param appDetails is an app object with FB app details
+         *
+         */
+        updateApp: function(existingAppID, appDetails) {
+
+            var index;
+            var service = this;
+            var deferred = $q.defer();
+
+            this.getAppByFacebookID(existingAppID).
+                then(function(results) {
+                    index = results.index;
+                    return service.getAllApps();
+                }).
+                then(function(allApps) {
+                    allApps[index] = appDetails;
+                    return allApps;
+                }).
+                then(function(updatedApps) {
+                    return writeAppData(updatedApps);
+                }).
+                then(function(success) {
+                    deferred.resolve(appDetails);
+                }, function(error) {
+                    deferred.reject("Could not update saved app: " + error);
                 });
 
             return deferred.promise;

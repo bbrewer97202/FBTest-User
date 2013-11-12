@@ -44,7 +44,7 @@ fbt.directive('facebookAppList', function() {
             }
 
             $scope.addNewFBApp = function() {
-                $location.path("/facebookapp").search({ app: "" });
+                $location.path("/app/new").search({ app: "" });
             }
 
             $scope.selectedIndexUpdate = function() {
@@ -66,6 +66,10 @@ fbt.directive('facebookAppList', function() {
                 $location.path("/").search({ 
                     appid: $scope.fbApps[index].appID 
                 });
+            }
+
+            $scope.refreshHomeState = function() {
+                $location.path("/").search({ appid: "" });
             }
 
             $scope.getAppList(); 

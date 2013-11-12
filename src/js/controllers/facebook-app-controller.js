@@ -14,7 +14,7 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
         });
 
     $scope.editFBApp = function() {
-        $location.path("/facebookapp/" + $scope.selectedIndex);
+        $location.path("/app/edit").search({ appid: $scope.currentApp.appID });
     }
 
     $scope.deleteFBApp = function() {

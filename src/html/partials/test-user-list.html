@@ -3,7 +3,7 @@
     <div ng-repeat="testUser in testUsers" class="testUserListing">
         <h5>{{testUser.user.name}} ({{testUser.id}})</h5>
 
-        <button ng-click="openProfilePage('https://www.facebook.com/profile.php?id=' + testUser.user.id)">Profile Page</button>
+        <!-- <button ng-click="openProfilePage('https://www.facebook.com/profile.php?id=' + testUser.user.id)">Profile Page</button> -->
         <button ng-click="loginAsUser(testUser.login_url)">Login as {{testUser.user.first_name}}</button> 
         <button ng-click="deleteTestUser(testUser.id, currentApp.appToken)">Delete</button> 
     </div>
