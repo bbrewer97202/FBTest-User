@@ -1,7 +1,5 @@
-
-
 /****************************************************************************************
- *
+ * service for interfacing with saved FB apps
  ****************************************************************************************/
 fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', function($q, $rootScope, localStorageService) {
 
@@ -15,7 +13,7 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
         if ((localStorageService.remove('localStorageKey')) && (localStorageService.add(localStorageKey, JSON.stringify(data)))) {
             deferred.resolve(data);
         } else {
-            deferred.reject("Could not write data");
+            deferred.reject("Could not write data to local storage.");
         }
 
         return deferred.promise;
@@ -145,10 +143,7 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
                 }).
                 then(function(allApps) {
                     allApps[index] = appDetails;
-                    return allApps;
-                }).
-                then(function(updatedApps) {
-                    return writeAppData(updatedApps);
+                    return writeAppData(allApps);
                 }).
                 then(function(success) {
                     deferred.resolve(appDetails);

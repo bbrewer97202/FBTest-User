@@ -2,8 +2,8 @@
  * controller for facebook add edit app view
  ****************************************************************************************/
 fbt.controller('facebookAppEditorController', 
-    ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
-    function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
+    ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 'notificationService', 
+    function($scope, $location, facebookGraphFactory, facebookAppsFactory, notificationService) {
     
     $scope.isEditMode = true;
     $scope.appDetails = {};
@@ -14,8 +14,7 @@ fbt.controller('facebookAppEditorController',
             $scope.appDetails = result.app;
             $scope.reset();
         }, function(result) {
-            //todo
-            //invalid id or no id
+            notificationService.error('Could not access app with id "' + $scope.fbAppID + '": ' + error);
         });
 
     $scope.cancel = function() {
@@ -28,10 +27,10 @@ fbt.controller('facebookAppEditorController',
 
         facebookAppsFactory.updateApp($scope.fbAppID, $scope.appDetails).
             then(function(result) {
+                notificationService.confirm(result.appName + ' successfully updated');
                 $location.path("/").search({ appid: result.appID });
             }, function(error) {
-                //todo handle this like the others
-                console.log("error: ", error);
+                notificationService.error("Error when updating app: " + error);
             });
     }    
 
@@ -45,27 +44,12 @@ fbt.controller('facebookAppEditorController',
             then(function(result) {
                 $scope.appUpdates.appToken = result;
             }, function(error) {
-                //todo: something better than this
-                alert("Error accessing app access token: " + error);
+                notificationService.error("Error accessing app access token: " + error);
             });
     }
 
     $scope.isUnchanged = function(updates) {
         return angular.equals(updates, $scope.appDetails);
     }
-
-    // if ($scope.isValidID) {
-
-    //     facebookAppsFactory.getAppByFacebookID(id).
-    //         then(function(result) {
-    //             $scope.appDetails = result;
-    //         }, function(error) {
-    //             //todo
-    //             console.log("get error");
-    //         }).
-    //         finally(function() {
-    //             $scope.reset();
-    //         });            
-    // }
 
 }]);

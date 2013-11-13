@@ -2,8 +2,8 @@
  * controller for facebook add new app view
  ****************************************************************************************/
 fbt.controller('facebookAppAddNewController', [
-    '$scope', '$location', 'facebookAppsFactory', 'facebookGraphFactory', 
-    function($scope, $location, facebookAppsFactory, facebookGraphFactory) {
+    '$scope', '$location', 'facebookAppsFactory', 'facebookGraphFactory', 'notificationService', 
+    function($scope, $location, facebookAppsFactory, facebookGraphFactory, notificationService) {
 
     $scope.isEditMode = false;
     $scope.appDetails = {};
@@ -15,11 +15,11 @@ fbt.controller('facebookAppAddNewController', [
     $scope.submit = function(updates) {        
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
-            then(function(result) {                
+            then(function(result) {
+                notificationService.confirm('Successfully create new app \"' + result.appName + '"');
                 $location.path("/").search({ appid: result.appID });
             }, function(error) {
-                //todo: how to handle
-                alert("save App error: ", error);
+                notificationService.error("Error saving app: " + error);
             });
     }    
 
@@ -29,8 +29,7 @@ fbt.controller('facebookAppAddNewController', [
             then(function(result) {
                 $scope.appUpdates.appToken = result;
             }, function(error) {
-                //todo: something better than this
-                alert("Error accessing app access token: " + error);
+                notificationService.error("Error accessing app access token: " + error);
             });
     }
 

@@ -1,7 +1,8 @@
 /****************************************************************************************
  *
  ****************************************************************************************/
-fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
+fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFactory', 'notificationService', 
+    function($scope, $location, facebookAppsFactory, notificationService) {
 
     $scope.currentApp = {};
 
@@ -9,8 +10,6 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
     facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
         then(function(result) {
             $scope.currentApp = result.app
-        }, function(result) {
-            //invalid id or no id
         });
 
     $scope.editFBApp = function() {
@@ -22,11 +21,10 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
         if (confirmMsg) {
             facebookAppsFactory.deleteAppByID($scope.currentApp.appID).
                 then(function(result) {
+                    notificationService.confirm("Successfully removed app");
                     $location.path("/").search({ appid: "" });
                 }, function(error) {
-                    //todo handle this
-                    //todo remove two different location references
-                    alert("delete app by index error");
+                    notificationService.error("Could not remove app: " + error);
                     $location.path("/").search({ appid: "" });
                 });
         }

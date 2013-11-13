@@ -2,6 +2,7 @@
  * display a list of facebook apps as received from facebookAppsFactory service
  ****************************************************************************************/
 fbt.directive('facebookAppList', function() {
+
     return {
         restrict: 'A',
         templateUrl: 'facebook-app-list.html',
@@ -27,7 +28,7 @@ fbt.directive('facebookAppList', function() {
             }, true);
         },
 
-        controller: ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
+        controller: ['$scope', '$location', 'facebookAppsFactory', 'notificationService', function($scope, $location, facebookAppsFactory, notificationService) {
 
             $scope.fbApps = [];
             $scope.selectedIndex;            
@@ -40,6 +41,7 @@ fbt.directive('facebookAppList', function() {
                     }, function(error) {
                         //todo: handle this 
                         console.log("getAllApps: ERROR: " + error);
+
                     });
             }
 

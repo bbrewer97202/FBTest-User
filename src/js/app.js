@@ -1,7 +1,7 @@
 /****************************************************************************************
  * facebook test user primary module + routing configulation
  ****************************************************************************************/
-var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
+var fbt = angular.module('fbt', ['ngRoute', 'ngAnimate', 'LocalStorageModule']);
 
 fbt.config(['$routeProvider', function($routeProvider) {
 

@@ -10,6 +10,9 @@
 <body>
 <article class="fbtContent" ng-controller="appController">    
 
+    <!-- messaging + error handling -->
+    <div message="{{messages}}"></div>
+
     <div class="fbtView">
         <section class="fbtViewContainer fbtViewContainerControls">
             <div class="fbtAppList" facebook-app-list appid="{{fbAppID}}"></div>

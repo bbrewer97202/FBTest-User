@@ -2,8 +2,8 @@
  *
  ****************************************************************************************/
 fbt.controller('testUserCreateController', [
-    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'facebookGraphFactory', 
-    function($scope, $location, $routeParams, facebookAppsFactory, facebookGraphFactory) {
+    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'facebookGraphFactory', 'notificationService', 
+    function($scope, $location, $routeParams, facebookAppsFactory, facebookGraphFactory, notificationService) {
 
         $scope.appDetails = {};
         $scope.testUser = {
@@ -17,9 +17,8 @@ fbt.controller('testUserCreateController', [
             facebookAppsFactory.getAppByFacebookID($routeParams.appID).
                 then(function(result) {
                     $scope.appDetails = result.app;
-                }, function(result) {
-                    //todo: handle
-                    console.log("error: ", result);
+                }, function(error) {
+                    notificationService.error("Error retrieving Facebook app: " + error);
                 });
         }
 
@@ -39,12 +38,10 @@ fbt.controller('testUserCreateController', [
  
         facebookGraphFactory.testUserCreate($scope.appDetails.appID, $scope.testUser).
             then(function(result) {                
-                //todo: how to message success
+                notificationService.confirm("Successfully created test user");
                 $location.path("/");
             }, function(error) {
-                //todo: how to handle
-                console.log("test user create error: ", error);
-                //$location.path("/");
+                notificationService.error("Error creating test user: " + error);
             });
     }    
 }]);

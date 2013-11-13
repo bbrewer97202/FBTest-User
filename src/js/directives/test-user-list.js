@@ -20,7 +20,7 @@ fbt.directive('testUserList', function() {
                 scope.getTestUserList();
             }, true);
         },
-        controller: ['$scope', 'facebookGraphFactory', function($scope, facebookGraphFactory) {
+        controller: ['$scope', 'facebookGraphFactory', 'notificationService', function($scope, facebookGraphFactory, notificationService) {
 
             $scope.testUsers = [];            
 
@@ -33,8 +33,7 @@ fbt.directive('testUserList', function() {
                                 $scope.testUsers = result.data;
                                 $scope.getTestUserDetails();
                             }, function(error) {
-                                //todo: handle this 
-                                // console.log("getTestUsers: ERROR: " + error);
+                                notificationService.error('Could not retrieve test user list for ' + $scope.currentApp.appName + ': ' + error);
                             });
                     }
                 }
@@ -51,8 +50,7 @@ fbt.directive('testUserList', function() {
                             then(function(result) {                        
                                 $scope.testUsers[index].user = result;
                             }, function(error) {
-                                //todo: handle this 
-                                console.log("getTestUserDetails: ERROR: " + error);
+                                notificationService.error("Could not get test user details: " + error);
                             });                    
                     })(i);  
                 }
@@ -73,9 +71,9 @@ fbt.directive('testUserList', function() {
                     facebookGraphFactory.deleteTestUser(userId, appToken).
                         then(function(result) {
                             $scope.getTestUserList();
+                            notificationService.confirm('Successfully deleted test user "' + userId + '"');
                         }, function(error) {
-                            //todo: handle this
-                            alert("delete user error" + error);
+                            notificationService.error("Could not delete test user: " + error);
                         });
                 }
             }

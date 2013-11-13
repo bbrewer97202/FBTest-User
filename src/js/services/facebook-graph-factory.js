@@ -1,11 +1,8 @@
 /****************************************************************************************
- *
+ * service for making Facebook graph calls
  ****************************************************************************************/
 fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
-    //https://graph.facebook.com/oauth/access_token?client_id=115039128524812&client_secret=ec1b767dda4c07a238f26d118ef11cd6&grant_type=client_credentials
-
-    //public methods
     return {
 
         getAppAccessToken: function(id, secret) {
@@ -13,21 +10,17 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             var deferred = $q.defer();
             var url = 'https://graph.facebook.com/oauth/access_token?client_id=' + id + '&client_secret=' + secret + '&grant_type=client_credentials';
 
-            // console.log(url);
-
-            //todo : mucho error handling
-
             $http.get(url).
                 success(function(data, status, headers, config) {
                     if (data.indexOf("access_token=") !== -1) {
                         var token = data.split("=")[1];                        
                         deferred.resolve(token);
                     } else {
-                        deferred.reject("");
+                        deferred.reject("Could not retreive app access token");
                     }
                 }).
                 error(function(data, status, headers, config) {
-                    deferred.reject(data);
+                    deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                 });
 
             return deferred.promise;
@@ -39,15 +32,13 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + appid + "/accounts/test-users?access_token=" + token;
-                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
                         deferred.resolve(data);
                     }).
                     error(function(data, status, headers, config) {
-                        //todo: determine what to send back to reject
-                        deferred.reject(data);
+                        deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                     });
 
                 return deferred.promise;
@@ -59,15 +50,13 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             if ((typeof(id) === "string") && (typeof(token) === "string")) {
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + id + "/?access_token=" + token;
-                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
                         deferred.resolve(data);
                     }).
                     error(function(data, status, headers, config) {
-                        //todo: determine what to send back to reject
-                        deferred.reject(data);
+                        deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                     });
 
                 return deferred.promise;
@@ -106,8 +95,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
                 deferred.resolve(data);
             }).
             error(function(data, status, headers, config) {
-                //todo
-                deferred.reject(data);
+                deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
             });
 
             return deferred.promise;
@@ -124,8 +112,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
                     deferred.resolve(data);
                 }).
                 error(function(data, status, headers, config) {
-                    //todo
-                    deferred.reject(data);
+                    deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                 });
 
             return deferred.promise;

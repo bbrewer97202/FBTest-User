@@ -1,4 +1,4 @@
-/*! fbt - v0.0.6 - 2013-11-11 */var fbt = angular.module('fbt', ['ngRoute', 'LocalStorageModule']);
+/*! fbt - v0.0.6 - 2013-11-13 */var fbt = angular.module('fbt', ['ngRoute', 'ngAnimate', 'LocalStorageModule']);
 
 fbt.config(['$routeProvider', function($routeProvider) {
 
@@ -51,7 +51,7 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
         if ((localStorageService.remove('localStorageKey')) && (localStorageService.add(localStorageKey, JSON.stringify(data)))) {
             deferred.resolve(data);
         } else {
-            deferred.reject("Could not write data");
+            deferred.reject("Could not write data to local storage.");
         }
 
         return deferred.promise;
@@ -181,10 +181,7 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
                 }).
                 then(function(allApps) {
                     allApps[index] = appDetails;
-                    return allApps;
-                }).
-                then(function(updatedApps) {
-                    return writeAppData(updatedApps);
+                    return writeAppData(allApps);
                 }).
                 then(function(success) {
                     deferred.resolve(appDetails);
@@ -200,9 +197,6 @@ fbt.factory('facebookAppsFactory', ['$q', '$rootScope', 'localStorageService', f
 
 fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
-    //https://graph.facebook.com/oauth/access_token?client_id=115039128524812&client_secret=ec1b767dda4c07a238f26d118ef11cd6&grant_type=client_credentials
-
-    //public methods
     return {
 
         getAppAccessToken: function(id, secret) {
@@ -210,21 +204,17 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             var deferred = $q.defer();
             var url = 'https://graph.facebook.com/oauth/access_token?client_id=' + id + '&client_secret=' + secret + '&grant_type=client_credentials';
 
-            // console.log(url);
-
-            //todo : mucho error handling
-
             $http.get(url).
                 success(function(data, status, headers, config) {
                     if (data.indexOf("access_token=") !== -1) {
                         var token = data.split("=")[1];                        
                         deferred.resolve(token);
                     } else {
-                        deferred.reject("");
+                        deferred.reject("Could not retreive app access token");
                     }
                 }).
                 error(function(data, status, headers, config) {
-                    deferred.reject(data);
+                    deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                 });
 
             return deferred.promise;
@@ -236,15 +226,13 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
 
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + appid + "/accounts/test-users?access_token=" + token;
-                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
                         deferred.resolve(data);
                     }).
                     error(function(data, status, headers, config) {
-                        //todo: determine what to send back to reject
-                        deferred.reject(data);
+                        deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                     });
 
                 return deferred.promise;
@@ -256,15 +244,13 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
             if ((typeof(id) === "string") && (typeof(token) === "string")) {
                 var deferred = $q.defer();
                 var url = "https://graph.facebook.com/" + id + "/?access_token=" + token;
-                // console.log(url);
 
                 $http.get(url).
                     success(function(data, status, headers, config) {
                         deferred.resolve(data);
                     }).
                     error(function(data, status, headers, config) {
-                        //todo: determine what to send back to reject
-                        deferred.reject(data);
+                        deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                     });
 
                 return deferred.promise;
@@ -303,8 +289,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
                 deferred.resolve(data);
             }).
             error(function(data, status, headers, config) {
-                //todo
-                deferred.reject(data);
+                deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
             });
 
             return deferred.promise;
@@ -321,8 +306,7 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
                     deferred.resolve(data);
                 }).
                 error(function(data, status, headers, config) {
-                    //todo
-                    deferred.reject(data);
+                    deferred.reject(data.error.type + ": " + data.error.message + " (" + data.error.code + ")");
                 });
 
             return deferred.promise;
@@ -330,19 +314,77 @@ fbt.factory('facebookGraphFactory', ['$http', '$q', function($http, $q) {
     }
 }]);
 
-fbt.controller('appController', ['$scope', '$rootScope', '$location', function($scope, $rootScope, $location) {
+fbt.service('notificationService', [function() {
 
-    //watch for location changes and assign a scope variable if present
-    $rootScope.$on('$locationChangeSuccess', function(event, newLocation, currentLocation) {         
+    var messageID = 0;
+    var messages = [];
 
-        $scope.fbAppID = $location.search()['appid'];
-    });
+    var logMessage = function(text, type) {
+        messageID++;
+        messages.push({
+            type: type,
+            text: text,
+            id: messageID
+        }); 
+
+        //limit messages count
+        if (messages.length > 10) {
+            messages.pop();
+        }
+    }
+
+    return {
+        
+        confirm: function(text) {
+            logMessage(text, 'confirm');
+        },
+
+        error: function(text) {
+            logMessage(text, 'error');
+        },
+
+        getMessages: function() {
+            return messages;
+        },
+
+        id: function() {
+            return messageID;
+        },
+
+        clear: function() {
+            messages = [];
+        }
+    }
+}]);
+
+fbt.controller('appController', ['$scope', '$location', '$timeout', 'notificationService', 
+    function($scope, $location, $timeout, notificationService) {
+
+        $scope.messages = [];
+        $scope.scopedService = notificationService;
+
+        //watch for location changes and assign a scope variable if present
+        $scope.$on('$locationChangeSuccess', function(event, newLocation, currentLocation) {         
+        
+            $scope.fbAppID = $location.search()['appid'];                                    
+            $scope.messages = notificationService.getMessages();
+
+            //short delay here allows multiple notifications to appear before clearing
+            $timeout(function() {
+                notificationService.clear();   
+            }, 500);
+        });
+
+        //watch for updates to the message in notification service
+        $scope.$watch('scopedService.id()', function(newValue, oldValue) {
+            $scope.messages = notificationService.getMessages();
+        });
 
 }]);
 
 fbt.controller('facebookAppAddNewController', [
-    '$scope', '$location', 'facebookAppsFactory', 'facebookGraphFactory', 
-    function($scope, $location, facebookAppsFactory, facebookGraphFactory) {
+    '$scope', '$location', 'facebookAppsFactory', 'facebookGraphFactory', 'notificationService', 
+    function($scope, $location, facebookAppsFactory, facebookGraphFactory, notificationService) {
 
     $scope.isEditMode = false;
     $scope.appDetails = {};
@@ -354,11 +396,11 @@ fbt.controller('facebookAppAddNewController', [
     $scope.submit = function(updates) {        
         $scope.appDetails = angular.copy(updates);        
         facebookAppsFactory.saveApp($scope.appDetails).
-            then(function(result) {                
+            then(function(result) {
+                notificationService.confirm('Successfully create new app \"' + result.appName + '"');
                 $location.path("/").search({ appid: result.appID });
             }, function(error) {
-                //todo: how to handle
-                alert("save App error: ", error);
+                notificationService.error("Error saving app: " + error);
             });
     }    
 
@@ -368,8 +410,7 @@ fbt.controller('facebookAppAddNewController', [
             then(function(result) {
                 $scope.appUpdates.appToken = result;
             }, function(error) {
-                //todo: something better than this
-                alert("Error accessing app access token: " + error);
+                notificationService.error("Error accessing app access token: " + error);
             });
     }
 
@@ -383,7 +424,8 @@ fbt.controller('facebookAppAddNewController', [
 
 }]);
 
-fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
+fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFactory', 'notificationService', 
+    function($scope, $location, facebookAppsFactory, notificationService) {
 
     $scope.currentApp = {};
 
@@ -391,8 +433,6 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
     facebookAppsFactory.getAppByFacebookID($scope.fbAppID).
         then(function(result) {
             $scope.currentApp = result.app
-        }, function(result) {
-            //invalid id or no id
         });
 
     $scope.editFBApp = function() {
@@ -404,11 +444,10 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
         if (confirmMsg) {
             facebookAppsFactory.deleteAppByID($scope.currentApp.appID).
                 then(function(result) {
+                    notificationService.confirm("Successfully removed app");
                     $location.path("/").search({ appid: "" });
                 }, function(error) {
-                    //todo handle this
-                    //todo remove two different location references
-                    alert("delete app by index error");
+                    notificationService.error("Could not remove app: " + error);
                     $location.path("/").search({ appid: "" });
                 });
         }
@@ -426,8 +465,8 @@ fbt.controller('facebookAppController', ['$scope', '$location', 'facebookAppsFac
 }]);
 
 fbt.controller('facebookAppEditorController', 
-    ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 
-    function($scope, $location, facebookGraphFactory, facebookAppsFactory) {
+    ['$scope', '$location', 'facebookGraphFactory', 'facebookAppsFactory', 'notificationService', 
+    function($scope, $location, facebookGraphFactory, facebookAppsFactory, notificationService) {
     
     $scope.isEditMode = true;
     $scope.appDetails = {};
@@ -438,8 +477,7 @@ fbt.controller('facebookAppEditorController',
             $scope.appDetails = result.app;
             $scope.reset();
         }, function(result) {
-            //todo
-            //invalid id or no id
+            notificationService.error('Could not access app with id "' + $scope.fbAppID + '": ' + error);
         });
 
     $scope.cancel = function() {
@@ -452,10 +490,10 @@ fbt.controller('facebookAppEditorController',
 
         facebookAppsFactory.updateApp($scope.fbAppID, $scope.appDetails).
             then(function(result) {
+                notificationService.confirm(result.appName + ' successfully updated');
                 $location.path("/").search({ appid: result.appID });
             }, function(error) {
-                //todo handle this like the others
-                console.log("error: ", error);
+                notificationService.error("Error when updating app: " + error);
             });
     }    
 
@@ -469,8 +507,7 @@ fbt.controller('facebookAppEditorController',
             then(function(result) {
                 $scope.appUpdates.appToken = result;
             }, function(error) {
-                //todo: something better than this
-                alert("Error accessing app access token: " + error);
+                notificationService.error("Error accessing app access token: " + error);
             });
     }
 
@@ -478,25 +515,11 @@ fbt.controller('facebookAppEditorController',
         return angular.equals(updates, $scope.appDetails);
     }
 
-    // if ($scope.isValidID) {
-
-    //     facebookAppsFactory.getAppByFacebookID(id).
-    //         then(function(result) {
-    //             $scope.appDetails = result;
-    //         }, function(error) {
-    //             //todo
-    //             console.log("get error");
-    //         }).
-    //         finally(function() {
-    //             $scope.reset();
-    //         });            
-    // }
-
 }]);
 
 fbt.controller('testUserCreateController', [
-    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'facebookGraphFactory', 
-    function($scope, $location, $routeParams, facebookAppsFactory, facebookGraphFactory) {
+    '$scope', '$location', '$routeParams', 'facebookAppsFactory', 'facebookGraphFactory', 'notificationService', 
+    function($scope, $location, $routeParams, facebookAppsFactory, facebookGraphFactory, notificationService) {
 
         $scope.appDetails = {};
         $scope.testUser = {
@@ -510,9 +533,8 @@ fbt.controller('testUserCreateController', [
             facebookAppsFactory.getAppByFacebookID($routeParams.appID).
                 then(function(result) {
                     $scope.appDetails = result.app;
-                }, function(result) {
-                    //todo: handle
-                    console.log("error: ", result);
+                }, function(error) {
+                    notificationService.error("Error retrieving Facebook app: " + error);
                 });
         }
 
@@ -532,17 +554,16 @@ fbt.controller('testUserCreateController', [
  
         facebookGraphFactory.testUserCreate($scope.appDetails.appID, $scope.testUser).
             then(function(result) {                
-                //todo: how to message success
+                notificationService.confirm("Successfully created test user");
                 $location.path("/");
             }, function(error) {
-                //todo: how to handle
-                console.log("test user create error: ", error);
-                //$location.path("/");
+                notificationService.error("Error creating test user: " + error);
             });
     }    
 }]);
 
 fbt.directive('facebookAppList', function() {
+
     return {
         restrict: 'A',
         templateUrl: 'facebook-app-list.html',
@@ -568,7 +589,7 @@ fbt.directive('facebookAppList', function() {
             }, true);
         },
 
-        controller: ['$scope', '$location', 'facebookAppsFactory', function($scope, $location, facebookAppsFactory) {
+        controller: ['$scope', '$location', 'facebookAppsFactory', 'notificationService', function($scope, $location, facebookAppsFactory, notificationService) {
 
             $scope.fbApps = [];
             $scope.selectedIndex;            
@@ -581,6 +602,7 @@ fbt.directive('facebookAppList', function() {
                     }, function(error) {
                         //todo: handle this 
                         console.log("getAllApps: ERROR: " + error);
+
                     });
             }
 
@@ -619,6 +641,23 @@ fbt.directive('facebookAppList', function() {
     }
 });
 
+fbt.directive('message', function() {
+
+    return {
+        restrict: 'A',
+        templateUrl: 'message.html',
+        replace: true,
+        link: function(scope, element, attrs) {
+            // attrs.$observe('message', function(val) {
+            //     console.log("observe message: " + val);
+            // });
+        },
+        controller: function($scope) {
+
+        }
+    }
+});
+
 fbt.directive('testUserList', function() {
     return {
         restrict: 'A',
@@ -638,7 +677,7 @@ fbt.directive('testUserList', function() {
                 scope.getTestUserList();
             }, true);
         },
-        controller: ['$scope', 'facebookGraphFactory', function($scope, facebookGraphFactory) {
+        controller: ['$scope', 'facebookGraphFactory', 'notificationService', function($scope, facebookGraphFactory, notificationService) {
 
             $scope.testUsers = [];            
 
@@ -651,8 +690,7 @@ fbt.directive('testUserList', function() {
                                 $scope.testUsers = result.data;
                                 $scope.getTestUserDetails();
                             }, function(error) {
-                                //todo: handle this 
-                                // console.log("getTestUsers: ERROR: " + error);
+                                notificationService.error('Could not retrieve test user list for ' + $scope.currentApp.appName + ': ' + error);
                             });
                     }
                 }
@@ -669,8 +707,7 @@ fbt.directive('testUserList', function() {
                             then(function(result) {                        
                                 $scope.testUsers[index].user = result;
                             }, function(error) {
-                                //todo: handle this 
-                                console.log("getTestUserDetails: ERROR: " + error);
+                                notificationService.error("Could not get test user details: " + error);
                             });                    
                     })(i);  
                 }
@@ -691,9 +728,9 @@ fbt.directive('testUserList', function() {
                     facebookGraphFactory.deleteTestUser(userId, appToken).
                         then(function(result) {
                             $scope.getTestUserList();
+                            notificationService.confirm('Successfully deleted test user "' + userId + '"');
                         }, function(error) {
-                            //todo: handle this
-                            alert("delete user error" + error);
+                            notificationService.error("Could not delete test user: " + error);
                         });
                 }
             }

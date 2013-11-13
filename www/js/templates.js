@@ -15,6 +15,11 @@ angular.module('fbt').run(['$templateCache', function($templateCache) {
   );
 
 
+  $templateCache.put('message.html',
+    "<div class=\"fbtMessage\"><div ng-repeat=\"message in messages\"><div class=\"fbtMessage-{{message.type}}\">{{message.text}}</div></div></div>"
+  );
+
+
   $templateCache.put('test-user-create.html',
     "<div class=\"fbtComponent\"><h2>Create Test User for {{appDetails.appName}}</h2><form name=\"facebookTestUserCreateForm\" novalidate=\"\" ng-hide=\"! appDetails.appID\"><div class=\"formRow\"><label>Name: <small>(leave blank to accept auto-generated name)</small></label><input type=\"text\" name=\"name\" ng-model=\"testUser.name\" required=\"\" class=\"input-large\"></div><div class=\"formRow\"><label>Permissions List:</label><input type=\"text\" name=\"name\" ng-model=\"testUser.permissions\" class=\"input-large\"></div><div class=\"formRow\"><label>Locale:</label><select name=\"locale\" ng-model=\"testUser.locale\" ng-options=\"v for v in localesList\" required=\"\"></select></div><div class=\"formRow\"><label>App installed:</label><input type=\"radio\" ng-model=\"testUser.installed\" value=\"true\">True<br><input type=\"radio\" ng-model=\"testUser.installed\" value=\"false\">False</div><div class=\"formRow formCTARow\"><button ng-click=\"cancel()\">Cancel</button> <button ng-click=\"submit()\">Submit</button></div></form><div class=\"error\" ng-show=\"! appDetails.appID\">Missing Facebook app ID</div></div>"
   );
